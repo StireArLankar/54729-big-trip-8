@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Юра Зеленский](https://up.htmlacademy.ru/ecmascript/8/user/54729).
-* Наставник: `Неизвестно`.
+* Наставник: [Артем Черкасов](https://up.htmlacademy.ru/ecmascript/8/user/530727).
 
 ---
 
