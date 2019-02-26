@@ -13,20 +13,21 @@ const addPrettyZeros = (number) => {
 };
 
 function renderTripPoints(points) {
-  const days = points.reduce((acc, cur, index) => {
-    const lastIndex = acc.length - 1;
+  const days = points.reduce((acc, cur) => {
+    let lastDay = acc[acc.length - 1];
     const curDate = printDate(cur.date.start);
 
-    if (index === 0 || acc[lastIndex].date !== curDate) {
-      const obj = {
+    if (!lastDay || lastDay.date !== curDate) {
+      lastDay = {
         index: acc.length + 1,
         date: curDate,
-        points: [cur]
+        points: []
       };
-      acc.push(obj);
-    } else {
-      acc[lastIndex].points.push(cur);
+
+      acc.push(lastDay);
     }
+
+    lastDay.points.push(cur);
     return acc;
   }, []);
 
