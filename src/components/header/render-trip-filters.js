@@ -1,6 +1,6 @@
 import {tripFilter as container} from './containers';
 
-function renderTripFilters(filters) {
+const renderTripFilters = (filters) => {
   const content = `
     ${filters.map((filter) => `
     <input type="radio" id="filter-${filter.name.toLowerCase()}" name="filter" value=${filter.name.toLowerCase()} ${filter.checked ? `checked` : ``}>
@@ -8,6 +8,6 @@ function renderTripFilters(filters) {
     `).join(``)}
   `;
   container.innerHTML = content;
-}
+};
 
 export default renderTripFilters;
