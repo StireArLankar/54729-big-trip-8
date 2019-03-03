@@ -8,9 +8,6 @@ const filterList = [
   },
   {
     name: `Past`,
-  },
-  {
-    name: `Test`
   }
 ];
 

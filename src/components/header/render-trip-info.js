@@ -5,7 +5,7 @@ const pointsContainer = container.querySelector(`.trip__points`);
 const datesContainer = container.querySelector(`.trip__dates`);
 const costContainer = container.querySelector(`.trip__total-cost`);
 
-function renderTripInfo(icon, points) {
+const renderTripInfo = (icon, points) => {
   const len = points.length;
 
   const cities = points.reduce((acc, cur) => {
@@ -16,9 +16,9 @@ function renderTripInfo(icon, points) {
   }, []);
   const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
 
-  const startDate = getDate(points[0].date.start);
-  const endDate = getDate(points[len - 1].date.end);
-  const date = `${startDate} — ${endDate}`;
+  const startDate = points[0].date.start;
+  const endDate = points[len - 1].date.end;
+  const date = `${getDate(startDate)} — ${getDate(endDate)}`;
 
   const total = points.reduce((acc, cur) => acc + cur.price, 0);
 
@@ -26,13 +26,13 @@ function renderTripInfo(icon, points) {
   pointsContainer.textContent = path;
   datesContainer.textContent = date;
   costContainer.textContent = `€ ${total}`;
-}
+};
 
-function getDate(date) {
+const getDate = (date) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
-}
+};
 
 export default renderTripInfo;
