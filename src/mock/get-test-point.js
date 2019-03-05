@@ -42,7 +42,10 @@ const getTestPoint = () => {
     price: 100 * (getRandomIndex(10) + 1),
     offers: [...getRandomSet(2, offerList)],
     date,
-    picture: `http://picsum.photos/300/150?r=${Math.random()}`,
+    pictures: [
+      `http://picsum.photos/300/150?r=${Math.random()}`,
+      `http://picsum.photos/300/150?r=${Math.random()}`
+    ],
     description: [...getRandomSet(3, descList)].join(` `)
   };
 };

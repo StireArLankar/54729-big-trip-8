@@ -1,15 +1,9 @@
 import getDaySection from './get-day-section';
 
-const container = document.querySelector(`.trip-points`);
-
-const printDate = (date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  return `${addPrettyZeros(day)}.${addPrettyZeros(month)}`;
-};
-
-const addPrettyZeros = (number) => {
-  return number < 10 ? `0${number}` : `${number}`;
+const getDayDifference = (first, last) => {
+  const diff = last - first;
+  const oneDay = 24 * 60 * 60 * 1000;
+  return Math.floor(diff / oneDay);
 };
 
 const clearElement = (el) => {
@@ -18,14 +12,16 @@ const clearElement = (el) => {
   }
 };
 
-const splitPointsToDays = (points) => {
+const splitPointsToDays = (points, start) => {
   return points.reduce((acc, cur) => {
     let lastDay = acc[acc.length - 1];
-    const curDate = printDate(cur.date.start);
+    const curDate = cur.date.start;
+    const isItNewDay = !lastDay || getDayDifference(lastDay.date, curDate) > 0;
 
-    if (!lastDay || lastDay.date !== curDate) {
+    if (isItNewDay) {
+      const index = getDayDifference(start, curDate) + 1;
       lastDay = {
-        index: acc.length + 1,
+        index,
         date: curDate,
         points: []
       };
@@ -38,8 +34,8 @@ const splitPointsToDays = (points) => {
   }, []);
 };
 
-const renderTripPoints = (points) => {
-  const days = splitPointsToDays(points);
+const renderTripPoints = (points, start, container) => {
+  const days = splitPointsToDays(points, start);
 
   const fragment = document.createDocumentFragment();
   days.forEach((day) => {
