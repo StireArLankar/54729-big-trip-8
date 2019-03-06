@@ -1,9 +1,7 @@
-import {renderTripInfo, renderTripFilters, addFilterListener} from './components/header';
-import {renderSorting, renderTripPoints} from './components/main';
-import headerFilterList from './common/header-filter-list';
-import mainSortingList from './common/main-sorting-list';
+import {addFilterListener} from './components/header';
+import {renderTripPoints} from './components/main';
 import {getTestPointList} from './mock';
-import iconDict from './common/icon-dict';
+import Trip from './class/trip';
 
 const testPoints = getTestPointList(6);
 
@@ -12,10 +10,10 @@ const randomPoints = (points) => {
   return [...temp];
 };
 
-renderTripInfo(iconDict.Taxi, testPoints);
-renderTripFilters(headerFilterList);
-renderSorting(mainSortingList);
-renderTripPoints(testPoints);
+const testTrip = new Trip(testPoints);
+testTrip.render();
+// testTrip.clearTripPoints();
+
 addFilterListener(() => {
   const temp = randomPoints(testPoints);
   renderTripPoints(temp);
