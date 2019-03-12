@@ -1,7 +1,14 @@
+import iconDict from '../../common/icon-dict';
+import {withPrepositions, printTime} from '../../common/utils';
+
 const getPointEditingArticle = (point) => {
   const pictures = point.pictures;
   const desc = point.description;
   const price = point.price;
+  const event = point.event;
+  const city = point.city;
+  const start = point.date.start;
+  const end = point.date.end;
   const article = document.createElement(`article`);
   article.classList.add(`point`);
 
@@ -14,7 +21,7 @@ const getPointEditingArticle = (point) => {
         </label>
 
         <div class="travel-way">
-          <label class="travel-way__label" for="travel-way__toggle">✈️</label>
+          <label class="travel-way__label" for="travel-way__toggle">${iconDict[event]}</label>
 
           <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -29,7 +36,7 @@ const getPointEditingArticle = (point) => {
               <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
               <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
 
-              <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train" checked>
+              <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight" checked>
               <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
             </div>
 
@@ -44,8 +51,8 @@ const getPointEditingArticle = (point) => {
         </div>
 
         <div class="point__destination-wrap">
-          <label class="point__destination-label" for="destination">Flight to</label>
-          <input class="point__destination-input" list="destination-select" id="destination" value="Chamonix" name="destination">
+          <label class="point__destination-label" for="destination">${withPrepositions(event)}</label>
+          <input class="point__destination-input" list="destination-select" id="destination" value=${city} name="destination">
           <datalist id="destination-select">
             <option value="airport"></option>
             <option value="Geneva"></option>
@@ -56,7 +63,7 @@ const getPointEditingArticle = (point) => {
 
         <label class="point__time">
           choose time
-          <input class="point__input" type="text" value="00:00 — 00:00" name="time" placeholder="00:00 — 00:00">
+          <input class="point__input" type="text" value="${printTime(start, end)}" name="time" placeholder="00:00 — 00:00">
         </label>
 
         <label class="point__price">

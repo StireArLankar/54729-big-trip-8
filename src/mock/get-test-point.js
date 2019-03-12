@@ -1,7 +1,8 @@
 import descList from './desc-list';
-import iconList from './icon-list';
+import eventList from './event-list';
 import offerList from './offer-list';
 import cityList from './city-list';
+import {withPrepositions} from '../common/utils';
 
 const getRandomIndex = (length) => {
   return Math.floor(Math.random() * length);
@@ -26,19 +27,20 @@ const getRandomSet = (length, array) => {
   return (new Set(temp));
 };
 
-const getRandomTitle = (city, icon) => {
-  return `${icon} at ${city}`;
+const getRandomTitle = (city, event) => {
+  const evt = withPrepositions(event);
+  return `${evt} ${city}`;
 };
 
 const getTestPoint = () => {
   const city = cityList[getRandomIndex(cityList.length)];
-  const icon = iconList[getRandomIndex(iconList.length)];
+  const event = eventList[getRandomIndex(eventList.length)];
   const date = getStartAndEnd();
 
   return {
     city,
-    icon,
-    title: getRandomTitle(city, icon),
+    event,
+    title: getRandomTitle(city, event),
     price: 100 * (getRandomIndex(10) + 1),
     offers: [...getRandomSet(2, offerList)],
     date,

@@ -9,12 +9,16 @@ const container = document.querySelector(`.trip-points`);
 
 class Trip {
   constructor(pointsData) {
-    this._points = pointsData.map((data) => new Point(data));
+    this._points = pointsData.map((data) => new Point(data, this));
     this._date = {
       start: getStartDate(pointsData),
       end: getEndDate(pointsData)
     };
     this._icon = iconDict.Taxi;
+  }
+
+  get points() {
+    return this._points;
   }
 
   get path() {

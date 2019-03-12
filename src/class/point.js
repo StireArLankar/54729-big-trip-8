@@ -1,53 +1,42 @@
 import getPointArticle from "../components/main/get-point-article";
-import getPointEditingArticle from "../components/main/get-point-editing-article";
+import PointConstructor from './point-constructor';
+import PointEditor from './point-editor';
 
-class Point {
-  constructor({city, icon, title, price, offers, date: {start, end}, pictures, description}) {
-    this.city = city;
-    this.icon = icon;
-    this.title = title;
-    this.price = price;
-    this.offers = offers;
-    this.date = {
-      start: new Date(start),
-      end: new Date(end)
-    };
-    this.pictures = pictures;
-    this.description = description;
+class Point extends PointConstructor {
+  constructor(data, trip) {
+    super(data);
+    this.trip = trip;
 
-    this.state = {
-      isEditing: false
-    };
+    this._ref = null;
+    this.editor = null;
+
+    this.openEditor = this.openEditor.bind(this);
+  }
+
+  get reference() {
+    return this._ref;
   }
 
   render() {
     this._ref = getPointArticle(this);
-    this._ref.addEventListener(`click`, this.changeState.bind(this));
+    this._ref.addEventListener(`click`, this.openEditor);
     return this._ref;
   }
 
-  changeState() {
-    const parent = this._ref.parentNode;
-    let temp;
-    if (this.state.isEditing) {
-      temp = getPointArticle(this);
-      temp.addEventListener(`click`, this.changeState.bind(this));
-    } else {
-      temp = getPointEditingArticle(this);
-      const form = temp.querySelector(`form`);
-      form.addEventListener(`submit`, (evt) => {
-        evt.preventDefault();
-        this.changeState();
-      });
-      form.addEventListener(`reset`, (evt) => {
-        evt.preventDefault();
-        this.changeState();
-      });
-    }
+  openEditor() {
+    this.trip.points.forEach((point) => {
+      point.closeEditor();
+    });
+    this.editor = new PointEditor(this.data, this);
+    this.editor.render();
+  }
 
-    this.state.isEditing = !this.state.isEditing;
-    parent.replaceChild(temp, this._ref);
-    this._ref = temp;
+  closeEditor() {
+    if (!this.editor) {
+      return;
+    }
+    this.editor.unrender();
+    this.editor = null;
   }
 
   unmount() {
@@ -56,5 +45,6 @@ class Point {
     this._ref = null;
   }
 }
+
 
 export default Point;

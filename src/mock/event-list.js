@@ -1,4 +1,4 @@
-const iconList = [
+const eventList = [
   `Taxi`,
   `Bus`,
   `Train`,
@@ -11,4 +11,4 @@ const iconList = [
   `Restaurant`
 ];
 
-export default iconList;
+export default eventList;
