@@ -15,7 +15,7 @@ const clearElement = (el) => {
 const splitPointsToDays = (points, start) => {
   return points.reduce((acc, cur) => {
     let lastDay = acc[acc.length - 1];
-    const curDate = cur.date.start;
+    const curDate = cur.model.date.start;
     const isItNewDay = !lastDay || getDayDifference(lastDay.date, curDate) > 0;
 
     if (isItNewDay) {

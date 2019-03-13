@@ -1,11 +1,13 @@
 import getPointArticle from "../components/main/get-point-article";
-import PointConstructor from './point-constructor';
+import PointModel from './point-model';
 import PointEditor from './point-editor';
+import Component from './component';
 
-class Point extends PointConstructor {
+class PointComponent extends Component {
   constructor(data, trip) {
-    super(data);
+    super();
     this.trip = trip;
+    this.model = new PointModel(data);
 
     this._ref = null;
     this.editor = null;
@@ -13,21 +15,23 @@ class Point extends PointConstructor {
     this.openEditor = this.openEditor.bind(this);
   }
 
-  get reference() {
-    return this._ref;
+  get template() {
+    return getPointArticle(this.model);
   }
 
-  render() {
-    this._ref = getPointArticle(this);
+  bind() {
     this._ref.addEventListener(`click`, this.openEditor);
-    return this._ref;
+  }
+
+  unbind() {
+    this._ref.removeEventListener(`click`, this.openEditor);
   }
 
   openEditor() {
     this.trip.points.forEach((point) => {
       point.closeEditor();
     });
-    this.editor = new PointEditor(this.data, this);
+    this.editor = new PointEditor(this);
     this.editor.render();
   }
 
@@ -38,13 +42,6 @@ class Point extends PointConstructor {
     this.editor.unrender();
     this.editor = null;
   }
-
-  unmount() {
-    const parent = this._ref.parentNode;
-    parent.removeChild(this._ref);
-    this._ref = null;
-  }
 }
 
-
-export default Point;
+export default PointComponent;

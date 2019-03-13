@@ -1,4 +1,4 @@
-class PointConstructor {
+class PointModel {
   constructor({city, event, title, price, offers, pictures, description, date: {start, end}}) {
     this._data = {
       city,
@@ -52,4 +52,4 @@ class PointConstructor {
   }
 }
 
-export default PointConstructor;
+export default PointModel;
