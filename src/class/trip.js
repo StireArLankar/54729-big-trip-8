@@ -1,4 +1,5 @@
-import Point from './point';
+import PointComponent from './point-component';
+import Component from './component';
 import {renderTripPoints, renderSorting} from '../components/main';
 import headerFilterList from '../common/header-filter-list';
 import mainSortingList from '../common/main-sorting-list';
@@ -7,14 +8,19 @@ import iconDict from '../common/icon-dict';
 
 const container = document.querySelector(`.trip-points`);
 
-class Trip {
+class Trip extends Component {
   constructor(pointsData) {
-    this._points = pointsData.map((data) => new Point(data));
+    super();
+    this._points = pointsData.map((data) => new PointComponent(data, this));
     this._date = {
       start: getStartDate(pointsData),
       end: getEndDate(pointsData)
     };
     this._icon = iconDict.Taxi;
+  }
+
+  get points() {
+    return this._points;
   }
 
   get path() {
@@ -45,7 +51,7 @@ class Trip {
   }
 
   clearTripPoints() {
-    this._points.forEach((point) => point.unmount());
+    this._points.forEach((point) => point.unrender());
     container.innerHTML = ``;
   }
 }
@@ -74,8 +80,8 @@ const convertToDateStart = (number) => {
 
 const getPath = (points) => {
   const cities = points.reduce((acc, cur) => {
-    if (acc[acc.length - 1] !== cur.city) {
-      acc.push(cur.city);
+    if (acc[acc.length - 1] !== cur.model.city) {
+      acc.push(cur.model.city);
     }
     return acc;
   }, []);
