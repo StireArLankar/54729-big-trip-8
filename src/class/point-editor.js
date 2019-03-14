@@ -15,7 +15,7 @@ class PointEditor extends Component {
   }
 
   get template() {
-    return getPointEditingArticle(this.point.model);
+    return getPointEditingArticle(this.point);
   }
 
   render() {
@@ -43,7 +43,7 @@ class PointEditor extends Component {
       altInput: true,
       altFormat: `M d`,
       dateFormat: `d-n`,
-      defaultDate: this.point.model.date.start
+      defaultDate: this.point.date.start
     });
 
   }
@@ -55,7 +55,7 @@ class PointEditor extends Component {
   }
 
   getDataFromForm() {
-    const data = formDataConverter(this._form, this.point.model);
+    const data = formDataConverter(this._form, this.point);
     return data;
   }
 

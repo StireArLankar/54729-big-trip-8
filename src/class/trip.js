@@ -38,14 +38,14 @@ class Trip extends Component {
 
   get totalPrice() {
     return this._points.reduce((acc, point) => {
-      return acc + point.model.totalPrice;
+      return acc + point.totalPrice;
     }, 0);
   }
 
   render() {
     this.sortPointsByDate();
     renderTripPoints(this._points, this.startDate, container);
-    // console.log(this.points.map((point) => point.model.date));
+    // console.log(this.points.map((point) => point.date));
     renderTripInfo(this);
     renderTripFilters(headerFilterList);
     renderSorting(mainSortingList);
@@ -56,7 +56,7 @@ class Trip extends Component {
     this.sortPointsByDate();
     renderTripPoints(this._points, this.startDate, container);
     renderTripInfo(this);
-    // console.log(this.points.map((point) => point.model.date));
+    // console.log(this.points.map((point) => point.date));
   }
 
   clearTripPoints() {
@@ -66,20 +66,20 @@ class Trip extends Component {
 
   sortPointsByDate() {
     this._points.sort((a, b) => {
-      return a.model.date.start - b.model.date.start;
+      return a.date.start - b.date.start;
     });
   }
 }
 
 const getStartDate = (points) => {
-  const temp = points.map((point) => point.model.date.start);
+  const temp = points.map((point) => point.date.start);
   const min = Math.min(...temp);
   const date = convertToDateStart(min);
   return date;
 };
 
 const getEndDate = (points) => {
-  const temp = points.map((point) => point.model.date.end);
+  const temp = points.map((point) => point.date.end);
   const max = Math.max(...temp);
   const date = convertToDateStart(max);
   return date;
@@ -87,8 +87,8 @@ const getEndDate = (points) => {
 
 const getPath = (points) => {
   const cities = points.reduce((acc, cur) => {
-    if (acc[acc.length - 1] !== cur.model.destination) {
-      acc.push(cur.model.destination);
+    if (acc[acc.length - 1] !== cur.destination) {
+      acc.push(cur.destination);
     }
     return acc;
   }, []);

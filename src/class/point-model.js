@@ -1,5 +1,8 @@
-class PointModel {
+import Component from "./component";
+
+class PointModel extends Component {
   constructor({destination, event, price, offers, pictures, description, date: {start, end}}) {
+    super();
     this._data = {
       destination,
       event,
@@ -54,7 +57,7 @@ class PointModel {
     return this._data;
   }
 
-  update(data) {
+  updateModel(data) {
     const temp = {
       destination: data.destination,
       event: data.event,

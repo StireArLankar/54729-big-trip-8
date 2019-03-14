@@ -1,13 +1,11 @@
 import getPointArticle from "../components/main/get-point-article";
 import PointModel from './point-model';
 import PointEditor from './point-editor';
-import Component from './component';
 
-class PointComponent extends Component {
+class PointComponent extends PointModel {
   constructor(data, trip) {
-    super();
+    super(data);
     this.trip = trip;
-    this.model = new PointModel(data);
 
     this._ref = null;
     this.editor = null;
@@ -16,7 +14,7 @@ class PointComponent extends Component {
   }
 
   get template() {
-    return getPointArticle(this.model);
+    return getPointArticle(this);
   }
 
   bind() {
@@ -44,7 +42,7 @@ class PointComponent extends Component {
   }
 
   update(data) {
-    this.model.update(data);
+    this.updateModel(data);
     this.closeEditor();
     this.trip.update();
   }
