@@ -1,10 +1,20 @@
 import iconDict from '../../common/icon-dict';
-import {printTime} from '../../common/utils';
+import {printTime, withPrepositions} from '../../common/utils';
 
-const getPointArticle = ({event, title, date: {start, end}, price, offers}) => {
+
+const getPointArticle = ({event, destination, date: {start, end}, price, offers}) => {
   const iconEmoji = iconDict[event];
   const diff = end - start;
   const [hour, min] = getTime(diff);
+  const title = `${withPrepositions(event)} ${destination}`;
+
+  const offersList = offers.map((offer) => {
+    return offer.checked ? `
+      <li>
+        <button class="trip-point__offer">${offer.name} € ${offer.price}</button>
+      </li>
+    ` : ``;
+  }).join(``);
 
   const article = document.createElement(`article`);
   article.classList.add(`trip-point`);
@@ -16,15 +26,9 @@ const getPointArticle = ({event, title, date: {start, end}, price, offers}) => {
       <span class="trip-point__duration">${hour > 0 ? `${hour}h` : ``} ${min > 0 ? `${min}m` : ``}</span>
     </p>
     <p class="trip-point__price">€ ${price}</p>
-    ${offers ? `
-      <ul class="trip-point__offers">
-        ${offers.map((offer) => `
-          <li>
-            <button class="trip-point__offer">${offer}</button>
-          </li>
-        `).join(``)}
-      </ul>
-    ` : ``}
+    <ul class="trip-point__offers">
+      ${offersList}
+    </ul>
   `;
   return article;
 };

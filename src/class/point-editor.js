@@ -1,5 +1,6 @@
 import Component from './component';
-import getPointEditingArticle from '../components/main/get-point-editing-article';
+import flatpickr from 'flatpickr';
+import getPointEditingArticle from '../components/get-point-editing-article';
 
 class PointEditor extends Component {
   constructor(point) {
@@ -34,6 +35,17 @@ class PointEditor extends Component {
     this._form.addEventListener(`submit`, this.submit);
     this._form.addEventListener(`reset`, this.reset);
     document.addEventListener(`keydown`, this.escape);
+
+    const date = this._form.querySelector(`.point__date`);
+    const dateInput = date.querySelector(`.point__input`);
+    date.style.display = `block`;
+    flatpickr(dateInput, {
+      altInput: true,
+      altFormat: `M d`,
+      dateFormat: `d-n`,
+      defaultDate: this.point.model.date.start
+    });
+
   }
 
   unbind() {
@@ -42,9 +54,15 @@ class PointEditor extends Component {
     document.removeEventListener(`keydown`, this.escape);
   }
 
+  getDataFromForm() {
+    const data = formDataConverter(this._form, this.point.model);
+    return data;
+  }
+
   submit(evt) {
     evt.preventDefault();
-    // this.point.update(data);
+    const data = this.getDataFromForm();
+    this.point.update(data);
     this.point.closeEditor();
   }
 
@@ -72,5 +90,57 @@ class PointEditor extends Component {
     this._ref = null;
   }
 }
+
+const timeExtracter = (startDate, endDate, date, time) => {
+  const [startTime, endTime] = time.split(` — `);
+  const [startHour, startMin] = startTime.split(`:`);
+  const [endHour, endMin] = endTime.split(`:`);
+  const [day, month] = date.split(`-`);
+  const start = dataUpgrader(startDate, month, day, startHour, startMin);
+  const end = dataUpgrader(endDate, month, day, endHour, endMin);
+  return [start, end];
+};
+
+const formDataConverter = (form, oldData) => {
+  const formData = new FormData(form);
+  const object = {};
+  const oldStart = oldData.date.start;
+  const oldEnd = oldData.date.end;
+
+  for (let pair of formData.entries()) {
+    object[pair[0]] = pair[1];
+  }
+
+  const [start, end] = timeExtracter(oldStart, oldEnd, object.day, object.time);
+  const evt = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
+
+  const offersElements = form.querySelectorAll(`.point__offers-input`);
+  const offersCheck = [...offersElements].map((offer) => offer.checked);
+  const offers = oldData.offers.map((offer, index) => {
+    const temp = Object.assign({}, offer);
+    temp.checked = offersCheck[index];
+    return temp;
+  });
+
+  const data = {
+    destination: object.destination,
+    event: evt,
+    price: Number(object.price),
+    offers,
+    date: {
+      start,
+      end
+    }
+  };
+
+  return data;
+};
+
+const dataUpgrader = (date, month, day, hour, min) => {
+  const temp = new Date(date);
+  temp.setMonth(month - 1, day);
+  temp.setHours(hour, min);
+  return temp;
+};
 
 export default PointEditor;

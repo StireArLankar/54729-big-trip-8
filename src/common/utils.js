@@ -36,4 +36,12 @@ const fixMinZeros = (min) => {
   return min.toString().length === 1 ? `0${min}` : min;
 };
 
-export {withPrepositions, printTime};
+const convertToDateStart = (number) => {
+  const date = new Date(number);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  return new Date(year, month, day);
+};
+
+export {withPrepositions, printTime, convertToDateStart};

@@ -1,4 +1,5 @@
 import getDaySection from './get-day-section';
+import {convertToDateStart} from '../../common/utils';
 
 const getDayDifference = (first, last) => {
   const diff = last - first;
@@ -22,7 +23,7 @@ const splitPointsToDays = (points, start) => {
       const index = getDayDifference(start, curDate) + 1;
       lastDay = {
         index,
-        date: curDate,
+        date: convertToDateStart(curDate),
         points: []
       };
 

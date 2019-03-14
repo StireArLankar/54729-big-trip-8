@@ -42,6 +42,12 @@ class PointComponent extends Component {
     this.editor.unrender();
     this.editor = null;
   }
+
+  update(data) {
+    this.model.update(data);
+    this.closeEditor();
+    this.trip.update();
+  }
 }
 
 export default PointComponent;
