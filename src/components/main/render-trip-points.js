@@ -1,4 +1,5 @@
 import getDaySection from './get-day-section';
+import {convertToDateStart} from '../../common/utils';
 
 const getDayDifference = (first, last) => {
   const diff = last - first;
@@ -15,14 +16,14 @@ const clearElement = (el) => {
 const splitPointsToDays = (points, start) => {
   return points.reduce((acc, cur) => {
     let lastDay = acc[acc.length - 1];
-    const curDate = cur.model.date.start;
+    const curDate = cur.date.start;
     const isItNewDay = !lastDay || getDayDifference(lastDay.date, curDate) > 0;
 
     if (isItNewDay) {
       const index = getDayDifference(start, curDate) + 1;
       lastDay = {
         index,
-        date: curDate,
+        date: convertToDateStart(curDate),
         points: []
       };
 

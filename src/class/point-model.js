@@ -1,9 +1,11 @@
-class PointModel {
-  constructor({city, event, title, price, offers, pictures, description, date: {start, end}}) {
+import Component from "./component";
+
+class PointModel extends Component {
+  constructor({destination, event, price, offers, pictures, description, date: {start, end}}) {
+    super();
     this._data = {
-      city,
+      destination,
       event,
-      title,
       price,
       offers,
       pictures,
@@ -15,16 +17,12 @@ class PointModel {
     };
   }
 
-  get city() {
-    return this._data.city;
+  get destination() {
+    return this._data.destination;
   }
 
   get event() {
     return this._data.event;
-  }
-
-  get title() {
-    return this._data.title;
   }
 
   get price() {
@@ -33,6 +31,14 @@ class PointModel {
 
   get offers() {
     return this._data.offers;
+  }
+
+  get totalPrice() {
+    const basePrice = this.price;
+    const offersPrice = this.offers.reduce((accum, offer) => {
+      return offer.checked ? accum + offer.price : accum;
+    }, 0);
+    return basePrice + offersPrice;
   }
 
   get pictures() {
@@ -49,6 +55,22 @@ class PointModel {
 
   get data() {
     return this._data;
+  }
+
+  updateModel(data) {
+    const temp = {
+      destination: data.destination,
+      event: data.event,
+      price: data.price,
+      offers: data.offers,
+      pictures: this.data.pictures,
+      description: this.data.description,
+      date: {
+        start: data.date.start,
+        end: data.date.end
+      }
+    };
+    this._data = temp;
   }
 }
 

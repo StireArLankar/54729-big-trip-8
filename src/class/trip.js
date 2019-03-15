@@ -5,6 +5,7 @@ import headerFilterList from '../common/header-filter-list';
 import mainSortingList from '../common/main-sorting-list';
 import {renderTripInfo, renderTripFilters} from '../components/header';
 import iconDict from '../common/icon-dict';
+import {convertToDateStart} from '../common/utils';
 
 const container = document.querySelector(`.trip-points`);
 
@@ -12,10 +13,6 @@ class Trip extends Component {
   constructor(pointsData) {
     super();
     this._points = pointsData.map((data) => new PointComponent(data, this));
-    this._date = {
-      start: getStartDate(pointsData),
-      end: getEndDate(pointsData)
-    };
     this._icon = iconDict.Taxi;
   }
 
@@ -32,27 +29,45 @@ class Trip extends Component {
   }
 
   get startDate() {
-    return this._date.start;
+    return getStartDate(this._points);
   }
 
   get endDate() {
-    return this._date.end;
+    return getEndDate(this._points);
   }
 
   get totalPrice() {
-    return this._points.reduce((acc, cur) => acc + cur.price, 0);
+    return this._points.reduce((acc, point) => {
+      return acc + point.totalPrice;
+    }, 0);
   }
 
   render() {
+    this.sortPointsByDate();
     renderTripPoints(this._points, this.startDate, container);
+    // console.log(this.points.map((point) => point.date));
     renderTripInfo(this);
     renderTripFilters(headerFilterList);
     renderSorting(mainSortingList);
   }
 
+  update() {
+    this.clearTripPoints();
+    this.sortPointsByDate();
+    renderTripPoints(this._points, this.startDate, container);
+    renderTripInfo(this);
+    // console.log(this.points.map((point) => point.date));
+  }
+
   clearTripPoints() {
     this._points.forEach((point) => point.unrender());
     container.innerHTML = ``;
+  }
+
+  sortPointsByDate() {
+    this._points.sort((a, b) => {
+      return a.date.start - b.date.start;
+    });
   }
 }
 
@@ -70,18 +85,10 @@ const getEndDate = (points) => {
   return date;
 };
 
-const convertToDateStart = (number) => {
-  const date = new Date(number);
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const day = date.getDate();
-  return new Date(year, month, day);
-};
-
 const getPath = (points) => {
   const cities = points.reduce((acc, cur) => {
-    if (acc[acc.length - 1] !== cur.model.city) {
-      acc.push(cur.model.city);
+    if (acc[acc.length - 1] !== cur.destination) {
+      acc.push(cur.destination);
     }
     return acc;
   }, []);
