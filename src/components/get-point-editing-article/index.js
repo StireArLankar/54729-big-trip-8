@@ -79,7 +79,7 @@ const getPointEditingArticle = (point) => {
 
         <div class="point__buttons">
           <button class="point__button point__button--save" type="submit">Save</button>
-          <button class="point__button" type="reset">Delete</button>
+          <button class="point__button point__button--delete" type="button">Delete</button>
         </div>
 
         <div class="paint__favorite-wrap">

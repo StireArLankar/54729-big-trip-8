@@ -9,9 +9,10 @@ class PointEditor extends Component {
     this._ref = null;
     this._form = null;
 
-    this.submit = this.submit.bind(this);
-    this.reset = this.reset.bind(this);
-    this.escape = this.escape.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.onReset = this.onReset.bind(this);
+    this.onEscDown = this.onEscDown.bind(this);
+    this.onDelete = this.onDelete.bind(this);
   }
 
   get template() {
@@ -32,9 +33,10 @@ class PointEditor extends Component {
   }
 
   bind() {
-    this._form.addEventListener(`submit`, this.submit);
-    this._form.addEventListener(`reset`, this.reset);
-    document.addEventListener(`keydown`, this.escape);
+    this._form.addEventListener(`submit`, this.onSubmit);
+    this._form.addEventListener(`reset`, this.onReset);
+    document.addEventListener(`keydown`, this.onEscDown);
+    this._form.querySelector(`.point__button--delete`).addEventListener(`click`, this.onDelete);
 
     const date = this._form.querySelector(`.point__date`);
     const dateInput = date.querySelector(`.point__input`);
@@ -49,9 +51,10 @@ class PointEditor extends Component {
   }
 
   unbind() {
-    this._form.removeEventListener(`submit`, this.submit);
-    this._form.removeEventListener(`reset`, this.reset);
-    document.removeEventListener(`keydown`, this.escape);
+    this._form.removeEventListener(`submit`, this.onSubmit);
+    this._form.removeEventListener(`reset`, this.onReset);
+    document.removeEventListener(`keydown`, this.onEscDown);
+    this._form.querySelector(`.point__button--delete`).removeEventListener(`click`, this.onDelete);
   }
 
   getDataFromForm() {
@@ -59,25 +62,30 @@ class PointEditor extends Component {
     return data;
   }
 
-  submit(evt) {
+  onSubmit(evt) {
     evt.preventDefault();
     const data = this.getDataFromForm();
     this.point.update(data);
     this.point.closeEditor();
   }
 
-  reset(evt) {
+  onReset(evt) {
     evt.preventDefault();
     this.point.closeEditor();
   }
 
-  escape(evt) {
+  onDelete(evt) {
+    evt.preventDefault();
+    this.point.delete();
+  }
+
+  onEscDown(evt) {
     const isEsc = evt.keyCode === 27;
     const insideForm = evt.path.includes(this._form);
     if (!isEsc || insideForm) {
       return;
     }
-    this.reset(evt);
+    this.onReset(evt);
   }
 
   unrender() {
