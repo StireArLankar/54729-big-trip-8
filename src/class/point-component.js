@@ -46,6 +46,10 @@ class PointComponent extends PointModel {
     this.closeEditor();
     this.trip.update();
   }
+
+  delete() {
+    this.trip.deletePoint(this);
+  }
 }
 
 export default PointComponent;
