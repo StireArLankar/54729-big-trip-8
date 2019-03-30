@@ -1,24 +1,28 @@
 import Component from "./component";
 
 class PointModel extends Component {
-  constructor({destination, event, price, offers, pictures, description, date: {start, end}}) {
+  constructor(data) {
     super();
     this._data = {
-      destination,
-      event,
-      price,
-      offers,
-      pictures,
-      description,
+      id: data.id,
+      event: convertTypeToEvent(data.type),
+      destination: data.destination,
+      price: data.base_price,
+      offers: data.offers,
+      isFavourite: data.is_favorite,
       date: {
-        start: new Date(start),
-        end: new Date(end)
+        start: new Date(data.date_from),
+        end: new Date(data.date_to)
       }
     };
   }
 
+  get id() {
+    return this._data.id;
+  }
+
   get destination() {
-    return this._data.destination;
+    return this._data.destination.name;
   }
 
   get event() {
@@ -36,17 +40,17 @@ class PointModel extends Component {
   get totalPrice() {
     const basePrice = this.price;
     const offersPrice = this.offers.reduce((accum, offer) => {
-      return offer.checked ? accum + offer.price : accum;
+      return offer.accepted ? accum + offer.price : accum;
     }, 0);
     return basePrice + offersPrice;
   }
 
   get pictures() {
-    return this._data.pictures;
+    return this._data.destination.pictures;
   }
 
   get description() {
-    return this._data.description;
+    return this._data.destination.description;
   }
 
   get date() {
@@ -58,20 +62,30 @@ class PointModel extends Component {
   }
 
   updateModel(data) {
-    const temp = {
-      destination: data.destination,
-      event: data.event,
-      price: data.price,
-      offers: data.offers,
-      pictures: this.data.pictures,
-      description: this.data.description,
-      date: {
-        start: data.date.start,
-        end: data.date.end
-      }
+    this._data = data;
+  }
+
+  static raw(data) {
+    return {
+      [`id`]: data.id,
+      [`type`]: data.event.toLowercase(),
+      [`destination`]: {
+        [`name`]: data.destination.name,
+        [`description`]: data.destination.description,
+        [`pictures`]: data.destination.pictures,
+      },
+      [`base_price`]: data.price,
+      [`offers`]: data.offers,
+      [`is_favorite`]: data.isFavourite,
+      [`date_from`]: data.date.start,
+      [`date_to`]: data.date.end
     };
-    this._data = temp;
   }
 }
+
+const convertTypeToEvent = (type) => {
+  const temp = type.slice(0, 1).toUpperCase() + type.slice(1);
+  return temp;
+};
 
 export default PointModel;

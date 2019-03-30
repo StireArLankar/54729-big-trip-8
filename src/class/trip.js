@@ -6,15 +6,28 @@ import mainSortingList from '../common/main-sorting-list';
 import {renderTripInfo, renderTripFilters} from '../components/header';
 import iconDict from '../common/icon-dict';
 import {convertToDateStart} from '../common/utils';
-import ChartComponent from './chart-component';
+import ServiceAPI from '../service/service-api';
+import ChartController from './chart-controller';
 
 const container = document.querySelector(`.trip-points`);
 const filtersContainer = document.querySelector(`.trip-filter`);
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
 class Trip extends Component {
-  constructor(pointsData) {
+  constructor() {
     super();
-    this._points = pointsData.map((data) => new PointComponent(data, this));
+    this.onEditorOpening = this.onEditorOpening.bind(this);
+    this.onPointUpdate = this.onPointUpdate.bind(this);
+    this.onPointDelete = this.onPointDelete.bind(this);
+    // this.onFilterChange = this.onFilterChange.bind(this);
+    this.setViewTable = this.setViewTable.bind(this);
+    this.setViewStats = this.setViewStats.bind(this);
+    this.setFilterMethod = this.setFilterMethod.bind(this);
+
+    this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
+
+    this._points = [];
     this._icon = iconDict.Taxi;
     this._renderedPoints = null;
     this._sortMethod = `Date`;
@@ -29,35 +42,14 @@ class Trip extends Component {
       stats: null
     };
 
-    this.chartLabels = getChartLabels(iconDict);
-
     this.sections = {
       main: null,
       stats: null
     };
 
-    this.charts = {
-      money: {
-        selector: null,
-        name: null,
-        unit: null,
-        data: null,
-        labels: null,
-        chart: null
-      },
-      transport: {
-        selector: null,
-        name: null,
-        unit: null,
-        data: null,
-        labels: null,
-        chart: null
-      }
-    };
+    this.chartController = null;
 
     this.setFilterMethod = this.setFilterMethod.bind(this);
-    this.setViewTable = this.setViewTable.bind(this);
-    this.setViewStats = this.setViewStats.bind(this);
   }
 
   get points() {
@@ -86,6 +78,96 @@ class Trip extends Component {
     }, 0);
   }
 
+  onEditorOpening() {
+    this._renderedPoints.forEach((point) => {
+      point.closeEditor();
+    });
+  }
+
+  _updatePoint(data, index) {
+    const indexInArray = this.points.findIndex((el) => el.index === index);
+    this._points[indexInArray].unrender();
+    this._points[indexInArray] = new PointComponent({
+      data,
+      onEditorOpening: this.onEditorOpening,
+      onPointUpdate: this.onPointUpdate,
+      onPointDelete: this.onPointDelete,
+      destinationsArray: this.destinationsArray,
+      offersArray: this.offersArray
+    });
+  }
+
+  onPointUpdate(data, index, pointComponent) {
+    this.api.updatePoint({id: index, data})
+      .then((updatedData) => this._updateTask(updatedData, index))
+      .then(() => this.update())
+      .catch(() => {
+        pointComponent.onError();
+      });
+  }
+
+  _deletePoint(index) {
+    const indexInArray = this.points.findIndex((el) => el.index === index);
+    const temp = [
+      ...this.points.slice(0, indexInArray),
+      ...this.points.slice(indexInArray + 1)
+    ];
+    this.points[indexInArray].unrender();
+    this.points = temp;
+  }
+
+  onPointDelete(index, pointComponent) {
+    this.api.deletePoint({id: index})
+      .then(() => this._deletePoint(index))
+      .then(() => this.update())
+      .catch(() => {
+        pointComponent.onError();
+      });
+  }
+
+  loadOffers() {
+    return this.api.getOffers()
+      .then((offers) => {
+        this.offersArray = offers;
+      });
+  }
+
+  loadDestinations() {
+    return this.api.getDestinations()
+      .then((destinations) => {
+        this.destinationsArray = destinations;
+      });
+  }
+
+  loadPoints() {
+    return this.api.getPoints()
+      .then((points) => {
+        this._points.forEach((point) => {
+          point.closeEditor();
+          point.unrender();
+          point = null;
+        });
+        console.log(points)
+        this._points = points.map((data) => {
+          return new PointComponent({
+            data,
+            onEditorOpening: this.onEditorOpening,
+            onPointUpdate: this.onPointUpdate,
+            onPointDelete: this.onPointDelete,
+            destinationsArray: this.destinationsArray,
+            offersArray: this.offersArray
+          });
+        });
+      });
+  }
+
+  start() {
+    this.loadOffers()
+      .then(() => this.loadDestinations())
+      .then(() => this.loadPoints())
+      .then(() => this.render());
+  }
+
   render() {
     this.sortAndFilterPoints();
     this.renderTripPoints();
@@ -93,6 +175,13 @@ class Trip extends Component {
     this.renderFilters(headerFilterList);
     renderSorting(mainSortingList);
     this.bind();
+  }
+
+  unrenderPoints() {
+    this._points.forEach((point) => {
+      point.unrender();
+    });
+    clearElement(container);
   }
 
   update() {
@@ -109,8 +198,8 @@ class Trip extends Component {
     this.sections.stats = document.querySelector(`.statistic`);
     this.links.table.addEventListener(`click`, this.setViewTable);
     this.links.stats.addEventListener(`click`, this.setViewStats);
-    this.initMoneyChart();
-    this.initTransportChart();
+    this.chartController = new ChartController(this.points);
+    this.chartController.initCharts(this.points);
   }
 
   unbind() {
@@ -118,36 +207,7 @@ class Trip extends Component {
     this.links.stats.removeEventListener(`click`, this.setViewStats);
     this.links = null;
     this.sections = null;
-  }
-
-  initMoneyChart() {
-    this.charts.money = {
-      selector: `.statistic__money`,
-      name: `Money`,
-      unit: `€`,
-      data: this.moneyData,
-      labels: this.chartLabels
-    };
-    this.charts.money.chart = new ChartComponent(this.charts.money);
-  }
-
-  initTransportChart() {
-    this.charts.transport = {
-      selector: `.statistic__transport`,
-      name: `Transport`,
-      unit: `x`,
-      data: this.transportData,
-      labels: this.chartLabels
-    };
-    this.charts.transport.chart = new ChartComponent(this.charts.transport);
-  }
-
-  get moneyData() {
-    return getMoneyData(this._points, this.chartLabels);
-  }
-
-  get transportData() {
-    return getTransportData(this._points, this.chartLabels);
+    this.chartController = null;
   }
 
   setViewTable() {
@@ -166,16 +226,11 @@ class Trip extends Component {
       return;
     }
     this.state.isStatisticShown = true;
-    this.updateStats();
+    this.chartController.updateCharts(this._points);
     this.links.table.classList.remove(`view-switch__item--active`);
     this.links.stats.classList.add(`view-switch__item--active`);
     this.sections.main.classList.add(`visually-hidden`);
     this.sections.stats.classList.remove(`visually-hidden`);
-  }
-
-  updateStats() {
-    this.charts.money.chart.updateChart(this.moneyData);
-    this.charts.transport.chart.updateChart(this.transportData);
   }
 
   renderFilters(list) {
@@ -188,16 +243,6 @@ class Trip extends Component {
 
   setFilterMethod(evt) {
     this._filterMethod = evt.target.value;
-    this.update();
-  }
-
-  deletePoint(point) {
-    const index = this.points.findIndex((el) => el === point);
-    const temp = [
-      ...this.points.slice(0, index),
-      ...this.points.slice(index + 1)
-    ];
-    this._points = temp;
     this.update();
   }
 
@@ -216,36 +261,6 @@ class Trip extends Component {
     this._renderedPoints = filteredPoints;
   }
 }
-
-const getMoneyData = (points, labels) => {
-  const dataSet = labels.map((label) => {
-    const [, evt] = label.split(` `);
-    const eventSum = points.reduce((acc, point) => {
-      return point.event === evt ? acc + point.totalPrice : acc;
-    }, 0);
-    return eventSum;
-  });
-  return dataSet;
-};
-
-const getTransportData = (points, labels) => {
-  const dataSet = labels.map((label) => {
-    const [, evt] = label.split(` `);
-    const eventSum = points.reduce((acc, point) => {
-      return point.event === evt ? acc + 1 : acc;
-    }, 0);
-    return eventSum;
-  });
-  return dataSet;
-};
-
-const getChartLabels = (dict) => {
-  const temp = Object.entries(dict).reduce((acc, cur) => {
-    acc.push(`${cur[1]} ${cur[0]}`);
-    return acc;
-  }, []).sort();
-  return temp;
-};
 
 const sortPoints = (points, method) => {
   switch (method) {
@@ -311,8 +326,21 @@ const getPath = (points) => {
     }
     return acc;
   }, []);
-  const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
-  return path;
+  if (cities.length <= 5) {
+    const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
+    return path;
+  } else {
+    const firstCities = cities.slice(0, 2);
+    const lastCities = cities.slice(-2);
+    const path = `${firstCities[0]} — ${firstCities[1]}  — ...  — ${lastCities[0]} — ${lastCities[1]}`;
+    return path;
+  }
+};
+
+const clearElement = (el) => {
+  while (el.children.length > 0) {
+    el.removeChild(el.lastChild);
+  }
 };
 
 export default Trip;

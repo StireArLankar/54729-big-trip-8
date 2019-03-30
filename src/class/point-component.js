@@ -3,14 +3,24 @@ import PointModel from './point-model';
 import PointEditor from './point-editor';
 
 class PointComponent extends PointModel {
-  constructor(data, trip) {
+  constructor({data, onEditorOpening, onPointUpdate, onPointDelete, offersArray, destinationsArray}) {
     super(data);
-    this.trip = trip;
+    this.destinationsArray = destinationsArray;
+    this.offersArray = offersArray;
+
+    this.cb = {
+      onEditorOpening,
+      onPointUpdate,
+      onPointDelete
+    };
 
     this._ref = null;
     this.editor = null;
 
     this.openEditor = this.openEditor.bind(this);
+    this.onEditorReset = this.onEditorReset.bind(this);
+    this.onEditorSubmit = this.onEditorSubmit.bind(this);
+    this.onEditorDelete = this.onEditorDelete.bind(this);
   }
 
   get template() {
@@ -25,30 +35,67 @@ class PointComponent extends PointModel {
     this._ref.removeEventListener(`click`, this.openEditor);
   }
 
-  openEditor() {
-    this.trip.points.forEach((point) => {
-      point.closeEditor();
+  openEditor(evt) {
+    evt.stopPropagation();
+    this.cb.onEditorOpening();
+
+    // this.trip.points.forEach((point) => {
+    //   point.closeEditor();
+    // });
+    this.editor = new PointEditor({
+      point: this,
+      onReset: this.onEditorReset,
+      onSubmit: this.onEditorSubmit,
+      onDelete: this.onEditorDelete,
+      destinationsArray: this.destinationsArray,
+      offersArray: this.offersArray
     });
-    this.editor = new PointEditor(this);
-    this.editor.render();
+
+    const editorRef = this.editor.render();
+    const cardRef = this._ref;
+    const container = cardRef.parentNode;
+    container.replaceChild(editorRef, cardRef);
+  }
+
+  onEditorReset() {
+    this.closeEditor();
+  }
+
+  onEditorSubmit(rawData) {
+    // this.update(data);
+    // this.closeEditor();
+    this.cb.onPointUpdate(rawData, this.index, this);
+  }
+
+  onError() {
+    this.editor.onError();
+  }
+
+  onEditorDelete() {
+    this.cb.onPointDelete(this.index, this);
   }
 
   closeEditor() {
     if (!this.editor) {
       return;
     }
+
+    const editorRef = this.editor.reference;
+    const cardRef = this._ref;
+    const container = editorRef.parentNode;
+    container.replaceChild(cardRef, editorRef);
+
     this.editor.unrender();
     this.editor = null;
   }
 
-  update(data) {
-    this.updateModel(data);
-    this.closeEditor();
-    this.trip.update();
-  }
-
-  delete() {
-    this.trip.deletePoint(this);
+  unrender() {
+    if (this._ref) {
+      this.closeEditor();
+      this.unbind();
+      this._ref.remove();
+      this._ref = null;
+    }
   }
 }
 

@@ -1,25 +1,24 @@
 import iconDict from '../../common/icon-dict';
-import eventList from '../../mock/event-list';
-import {withPrepositions, printTime} from '../../common/utils';
+import eventList from '../../common/event-list';
+import {withPrepositions} from '../../common/utils';
 
-const getPointEditingArticle = (point) => {
+const getPointEditingArticle = (point, destinationsArray, offersArray) => {
   const pictures = point.pictures;
   const desc = point.description;
   const price = point.price;
   const evnt = point.event;
   const offers = point.offers;
   const destination = point.destination;
-  const start = point.date.start;
-  const end = point.date.end;
+
   const article = document.createElement(`article`);
   article.classList.add(`point`);
 
   const offersList = offers.map((offer) => {
-    const id = offer.name.toLowerCase().replace(` `, `-`);
+    const id = offer.title.toLowerCase().replace(` `, `-`);
     return `
-      <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${offer.name}" ${offer.checked ? `checked` : ``}>
+      <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${offer.title}" ${offer.accepted ? `checked` : ``}>
       <label for="${id}" class="point__offers-label">
-        <span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
+        <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
       </label>
     `;
   }).join(``);
@@ -45,31 +44,29 @@ const getPointEditingArticle = (point) => {
     </div>
   `;
 
+  const destinationList = destinationsArray.map((dest) => {
+    return `<option value='${dest.name}'></option>`;
+  }).join(``);
+
   article.innerHTML = `
     <form action="" method="get">
       <header class="point__header">
-        <label class="point__date">
-          choose day
-          <input class="point__input" type="text" placeholder="MAR 18" name="day">
-        </label>
-
         ${travelWay}
 
         <div class="point__destination-wrap">
           <label class="point__destination-label" for="destination">${withPrepositions(evnt)}</label>
-          <input class="point__destination-input" list="destination-select" id="destination" value=${destination} name="destination">
+          <input class="point__destination-input" list="destination-select" id="destination" value="${destination}" name="destination">
           <datalist id="destination-select">
-            <option value="airport"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
-            <option value="hotel"></option>
+            ${destinationList}
           </datalist>
         </div>
 
-        <label class="point__time">
+        <div class="point__time">
           choose time
-          <input class="point__input" type="text" value="${printTime(start, end)}" name="time" placeholder="00:00 — 00:00">
-        </label>
+          <input class="point__input" type="text" value="19:00" name="date-start" placeholder="19:00">
+          <span class="point__span">  —  </span>
+          <input class="point__input" type="text" value="21:00" name="date-end" placeholder="21:00">
+        </div>
 
         <label class="point__price">
           write price
@@ -78,7 +75,7 @@ const getPointEditingArticle = (point) => {
         </label>
 
         <div class="point__buttons">
-          <button class="point__button point__button--save" type="submit">Save</button>
+          <button class="point__button point__button--save" type="button">Save</button>
           <button class="point__button point__button--delete" type="button">Delete</button>
         </div>
 
@@ -102,7 +99,7 @@ const getPointEditingArticle = (point) => {
           <p class="point__destination-text">${desc}</p>
           <div class="point__destination-images">
             ${pictures.map((picture) => `
-            <img src="${picture}" alt="picture from place" class="point__destination-image">
+            <img src="${picture.src}" alt="${picture.description}" class="point__destination-image">
             `).join(``)}
           </div>
         </section>
@@ -120,12 +117,73 @@ const getPointEditingArticle = (point) => {
     destLabel.innerHTML = withPrepositions(value);
   };
 
+  const upgradeOffers = (evt) => {
+    const value = evt.target.value;
+    const offersWrap = article.querySelector(`.point__offers-wrap`);
+    const newDiv = document.createElement(`div`);
+    newDiv.classList.add(`point__offers-wrap`);
+    newDiv.innerHTML = getOffers(value, offersArray);
+    offersWrap.parentNode.replaceChild(newDiv, offersWrap);
+  };
+
+  const upgradeLabelsAndOffers = (evt) => {
+    upgradeLabels(evt);
+    upgradeOffers(evt);
+  };
+
   const radioWayElements = article.querySelectorAll(`.travel-way__select-input`);
   radioWayElements.forEach((element) => {
-    element.addEventListener(`change`, upgradeLabels);
+    element.addEventListener(`change`, upgradeLabelsAndOffers);
   });
 
+  const onDestinationChange = (evt) => {
+    const index = destinationsArray.findIndex((dest) => dest.name === evt.target.value);
+    if (index > -1) {
+      upgradeDestination(destinationsArray[index]);
+    }
+  };
+
+  const upgradeDestination = (dest) => {
+    const destinationWrap = article.querySelector(`.point__destination`);
+    const newDiv = document.createElement(`section`);
+    newDiv.classList.add(`point__destination`);
+    newDiv.innerHTML = printDestination(dest);
+    destinationWrap.parentNode.replaceChild(newDiv, destinationWrap);
+  };
+
+  const destInput = article.querySelector(`.point__destination-input`);
+  destInput.addEventListener(`change`, onDestinationChange);
+
   return article;
+};
+
+const getOffers = (value, offersArray) => {
+  const index = offersArray.findIndex((offers) => offers.type === value.toLowerCase());
+  return printOffers(offersArray[index].offers);
+};
+
+const printOffers = (array) => {
+  return array.map((offer) => {
+    const id = offer.name.toLowerCase().replace(` `, `-`);
+    return `
+      <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${offer.name}">
+      <label for="${id}" class="point__offers-label">
+        <span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
+      </label>
+    `;
+  }).join(``);
+};
+
+const printDestination = (destination) => {
+  return `
+    <h3 class="point__details-title">Destination</h3>
+    <p class="point__destination-text">${destination.description}</p>
+    <div class="point__destination-images">
+      ${destination.pictures.map((picture) => `
+      <img src="${picture.src}" alt="${picture.description}" class="point__destination-image">
+      `).join(``)}
+    </div>
+  `;
 };
 
 export default getPointEditingArticle;

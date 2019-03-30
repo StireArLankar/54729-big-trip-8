@@ -447,13 +447,20 @@ input[type=radio]:checked + .trip-sorting__item {
   display: none;
 }
 .point__time {
-  font-size: 0;
+  font-size: 0px;
   width: 130px;
   margin-right: 40px;
   display: flex;
+  align-items: center;
+  text-align: center;
+}
+.point__time .point__span {
+  font-size: 17px;
+  padding-bottom: 6px;
 }
 .point__time .point__input {
   font-size: 17px;
+  text-align: center;
 }
 .point__price {
   display: flex;

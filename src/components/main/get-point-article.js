@@ -9,9 +9,9 @@ const getPointArticle = ({event, destination, date: {start, end}, price, offers}
   const title = `${withPrepositions(event)} ${destination}`;
 
   const offersList = offers.map((offer) => {
-    return offer.checked ? `
+    return offer.accepted ? `
       <li>
-        <button class="trip-point__offer">${offer.name} € ${offer.price}</button>
+        <button class="trip-point__offer">${offer.title} € ${offer.price}</button>
       </li>
     ` : ``;
   }).join(``);
