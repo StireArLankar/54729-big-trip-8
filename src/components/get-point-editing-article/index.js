@@ -9,6 +9,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
   const evnt = point.event;
   const offers = point.offers;
   const destination = point.destination;
+  const isFavourite = point.isFavourite;
 
   const article = document.createElement(`article`);
   article.classList.add(`point`);
@@ -80,7 +81,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
         </div>
 
         <div class="paint__favorite-wrap">
-          <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+          <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${isFavourite ? `checked` : ``}>
           <label class="point__favorite" for="favorite">favorite</label>
         </div>
       </header>

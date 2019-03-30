@@ -64,7 +64,7 @@ class PointComponent extends PointModel {
   onEditorSubmit(rawData) {
     // this.update(data);
     // this.closeEditor();
-    this.cb.onPointUpdate(rawData, this.index, this);
+    this.cb.onPointUpdate(rawData, this);
   }
 
   onError() {
@@ -72,7 +72,7 @@ class PointComponent extends PointModel {
   }
 
   onEditorDelete() {
-    this.cb.onPointDelete(this.index, this);
+    this.cb.onPointDelete(this.id, this);
   }
 
   closeEditor() {

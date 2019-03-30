@@ -44,7 +44,7 @@ class ServiceAPI {
     .then((result) => result.json());
   }
 
-  updateTask({id, data}) {
+  updatePoint({id, data}) {
     return this._load({
       url: `points/${id}`,
       method: Method.PUT,
@@ -54,7 +54,7 @@ class ServiceAPI {
     .then((result) => result.json());
   }
 
-  deleteTask({id}) {
+  deletePoint({id}) {
     return this._load({url: `points/${id}`, method: Method.DELETE});
   }
 
@@ -62,8 +62,7 @@ class ServiceAPI {
     headers.append(`Authorization`, this._authorization);
 
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
-      .then(checkStatus)
-      .catch(alert);
+      .then(checkStatus);
   }
 }
 

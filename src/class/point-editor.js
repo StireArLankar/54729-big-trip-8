@@ -68,7 +68,6 @@ class PointEditor extends Component {
   }
 
   unbind() {
-    // this._form.removeEventListener(`submit`, this.onSubmit);
     this._form.removeEventListener(`reset`, this.onReset);
     document.removeEventListener(`keydown`, this.onEscDown);
     this._form.querySelector(`.point__button--save`).removeEventListener(`click`, this.onSubmit);
@@ -76,7 +75,7 @@ class PointEditor extends Component {
   }
 
   getDataFromForm() {
-    const data = formDataConverter(this._form, this.point);
+    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, this.point.id);
     return data;
   }
 
@@ -94,11 +93,13 @@ class PointEditor extends Component {
   onSubmit(evt) {
     evt.preventDefault();
     const data = this.getDataFromForm();
-    const pointData = PointModel.raw(data);
-    this.block();
-    this.cb.onSubmit(pointData);
-    // this.point.update(data);
-    // this.point.closeEditor();
+    if (data) {
+      const pointData = PointModel.raw(data);
+      this.block();
+      this.cb.onSubmit(pointData);
+    } else {
+      this.shake();
+    }
   }
 
   onError() {
@@ -116,13 +117,21 @@ class PointEditor extends Component {
   }
 
   block() {
-    this._ref.querySelector(`.point__button--save`).disabled = false;
-    this._ref.querySelector(`.point__button--delete`).disabled = false;
+    const saveBtn = this._ref.querySelector(`.point__button--save`);
+    const deletBtn = this._ref.querySelector(`.point__button--delete`);
+    saveBtn.disabled = true;
+    deletBtn.disabled = true;
+    saveBtn.textContent = `..........`;
+    deletBtn.textContent = `.............`;
   }
 
   unblock() {
-    this._ref.querySelector(`.point__button--save`).disabled = true;
-    this._ref.querySelector(`.point__button--delete`).disabled = true;
+    const saveBtn = this._ref.querySelector(`.point__button--save`);
+    const deletBtn = this._ref.querySelector(`.point__button--delete`);
+    saveBtn.disabled = false;
+    deletBtn.disabled = false;
+    saveBtn.textContent = `Save`;
+    deletBtn.textContent = `Delete`;
   }
 
   onEscDown(evt) {
@@ -140,56 +149,66 @@ class PointEditor extends Component {
   }
 }
 
-const timeExtracter = (startDate, endDate, date, time) => {
-  const [startTime, endTime] = time.split(` — `);
-  const [startHour, startMin] = startTime.split(`:`);
-  const [endHour, endMin] = endTime.split(`:`);
-  const [day, month] = date.split(`-`);
-  const start = dataUpgrader(startDate, month, day, startHour, startMin);
-  const end = dataUpgrader(endDate, month, day, endHour, endMin);
-  return [start, end];
-};
-
-const formDataConverter = (form, oldData) => {
+const formDataConverter = (form, offersArray, destinationsArray, id) => {
   const formData = new FormData(form);
   const object = {};
-  const oldStart = oldData.date.start;
-  const oldEnd = oldData.date.end;
 
   for (let pair of formData.entries()) {
     object[pair[0]] = pair[1];
   }
 
-  const [start, end] = timeExtracter(oldStart, oldEnd, object.day, object.time);
+  const [start, end] = [new Date(object[`date-start`]), new Date(object[`date-end`])];
+
+  if (start - end > 0) {
+    return false;
+  }
+
   const evt = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
 
   const offersElements = form.querySelectorAll(`.point__offers-input`);
-  const offersCheck = [...offersElements].map((offer) => offer.checked);
-  const offers = oldData.offers.map((offer, index) => {
-    const temp = Object.assign({}, offer);
-    temp.checked = offersCheck[index];
-    return temp;
-  });
+  const offers = getNewOffers([...offersElements], evt, offersArray);
+
+  const destination = getNewDestination(object.destination, destinationsArray);
+
+  if (!destination) {
+    return false;
+  }
+
+  const isFavourite = form.querySelector(`.point__favorite-input`).checked;
 
   const data = {
-    destination: object.destination,
+    destination,
     event: evt,
     price: Number(object.price),
     offers,
     date: {
       start,
       end
-    }
+    },
+    isFavourite,
+    id
   };
 
   return data;
 };
 
-const dataUpgrader = (date, month, day, hour, min) => {
-  const temp = new Date(date);
-  temp.setMonth(month - 1, day);
-  temp.setHours(hour, min);
-  return temp;
+const getNewDestination = (name, destArray) => {
+  return destArray.find((dest) => dest.name === name);
+};
+
+const getNewOffers = (checkboxes, evt, offersArray) => {
+  const type = evt.toLowerCase();
+  const typedOffersIndex = offersArray.findIndex((element) => element.type === type);
+  const typedOffers = offersArray[typedOffersIndex].offers;
+  return typedOffers.map((offer) => {
+    const checkbox = checkboxes.find((cbhox) => cbhox.value === offer.name);
+    const accepted = checkbox ? checkbox.checked : false;
+    return {
+      title: offer.name,
+      price: offer.price,
+      accepted
+    };
+  });
 };
 
 export default PointEditor;

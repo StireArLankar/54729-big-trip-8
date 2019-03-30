@@ -20,7 +20,6 @@ class Trip extends Component {
     this.onEditorOpening = this.onEditorOpening.bind(this);
     this.onPointUpdate = this.onPointUpdate.bind(this);
     this.onPointDelete = this.onPointDelete.bind(this);
-    // this.onFilterChange = this.onFilterChange.bind(this);
     this.setViewTable = this.setViewTable.bind(this);
     this.setViewStats = this.setViewStats.bind(this);
     this.setFilterMethod = this.setFilterMethod.bind(this);
@@ -28,8 +27,8 @@ class Trip extends Component {
     this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
 
     this._points = [];
+    this._renderedPoints = [];
     this._icon = iconDict.Taxi;
-    this._renderedPoints = null;
     this._sortMethod = `Date`;
     this._filterMethod = `Everything`;
 
@@ -84,8 +83,9 @@ class Trip extends Component {
     });
   }
 
-  _updatePoint(data, index) {
-    const indexInArray = this.points.findIndex((el) => el.index === index);
+  _updatePoint(data) {
+    const id = data.id;
+    const indexInArray = this.points.findIndex((el) => +el.id === +id);
     this._points[indexInArray].unrender();
     this._points[indexInArray] = new PointComponent({
       data,
@@ -95,30 +95,31 @@ class Trip extends Component {
       destinationsArray: this.destinationsArray,
       offersArray: this.offersArray
     });
+    return indexInArray;
   }
 
-  onPointUpdate(data, index, pointComponent) {
-    this.api.updatePoint({id: index, data})
-      .then((updatedData) => this._updateTask(updatedData, index))
+  onPointUpdate(data, pointComponent) {
+    this.api.updatePoint({id: data.id, data})
+      .then((updatedData) => this._updatePoint(updatedData))
       .then(() => this.update())
       .catch(() => {
         pointComponent.onError();
       });
   }
 
-  _deletePoint(index) {
-    const indexInArray = this.points.findIndex((el) => el.index === index);
+  _deletePoint(id) {
+    const indexInArray = this.points.findIndex((el) => +el.id === +id);
     const temp = [
       ...this.points.slice(0, indexInArray),
       ...this.points.slice(indexInArray + 1)
     ];
     this.points[indexInArray].unrender();
-    this.points = temp;
+    this._points = temp;
   }
 
-  onPointDelete(index, pointComponent) {
-    this.api.deletePoint({id: index})
-      .then(() => this._deletePoint(index))
+  onPointDelete(id, pointComponent) {
+    this.api.deletePoint({id})
+      .then(() => this._deletePoint(id))
       .then(() => this.update())
       .catch(() => {
         pointComponent.onError();
@@ -129,6 +130,7 @@ class Trip extends Component {
     return this.api.getOffers()
       .then((offers) => {
         this.offersArray = offers;
+        // console.log({offers})
       });
   }
 
@@ -136,6 +138,7 @@ class Trip extends Component {
     return this.api.getDestinations()
       .then((destinations) => {
         this.destinationsArray = destinations;
+        // console.log({destinations})
       });
   }
 
@@ -147,7 +150,7 @@ class Trip extends Component {
           point.unrender();
           point = null;
         });
-        console.log(points)
+        // console.log({points})
         this._points = points.map((data) => {
           return new PointComponent({
             data,
@@ -161,14 +164,23 @@ class Trip extends Component {
       });
   }
 
+  onLoadingError() {
+    container.querySelector(`.trip__loading`).textContent = `
+      Something went wrong while loading your route info. Check your connection or try again later
+    `;
+  }
+
   start() {
     this.loadOffers()
       .then(() => this.loadDestinations())
       .then(() => this.loadPoints())
-      .then(() => this.render());
+      .then(() => this.render())
+      .catch(() => this.onLoadingError());
+
   }
 
   render() {
+    this.clearTripPoints();
     this.sortAndFilterPoints();
     this.renderTripPoints();
     renderTripInfo(this);

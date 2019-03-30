@@ -4,7 +4,7 @@ class PointModel extends Component {
   constructor(data) {
     super();
     this._data = {
-      id: data.id,
+      id: Number(data.id),
       event: convertTypeToEvent(data.type),
       destination: data.destination,
       price: data.base_price,
@@ -57,6 +57,10 @@ class PointModel extends Component {
     return this._data.date;
   }
 
+  get isFavourite() {
+    return this._data.isFavourite;
+  }
+
   get data() {
     return this._data;
   }
@@ -67,8 +71,8 @@ class PointModel extends Component {
 
   static raw(data) {
     return {
-      [`id`]: data.id,
-      [`type`]: data.event.toLowercase(),
+      [`id`]: data.id.toString(),
+      [`type`]: data.event.toLowerCase(),
       [`destination`]: {
         [`name`]: data.destination.name,
         [`description`]: data.destination.description,
@@ -77,8 +81,8 @@ class PointModel extends Component {
       [`base_price`]: data.price,
       [`offers`]: data.offers,
       [`is_favorite`]: data.isFavourite,
-      [`date_from`]: data.date.start,
-      [`date_to`]: data.date.end
+      [`date_from`]: +data.date.start,
+      [`date_to`]: +data.date.end
     };
   }
 }
