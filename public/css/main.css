@@ -311,6 +311,7 @@ input[type=radio]:checked + .trip-sorting__item {
   left: 50%;
   transform: translateX(-50%);
   min-width: 100%;
+  white-space: nowrap;
 }
 
 .trip-day__items {

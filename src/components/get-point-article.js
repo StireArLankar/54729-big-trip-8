@@ -1,5 +1,5 @@
-import iconDict from '../../common/icon-dict';
-import {printTime, withPrepositions, printValueWithZero} from '../../common/utils';
+import iconDict from '../common/icon-dict';
+import {printTime, withPrepositions, printValueWithZero} from '../common/utils';
 
 
 const getPointArticle = ({event, destination, date: {start, end}, price, offers}) => {

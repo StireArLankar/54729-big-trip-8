@@ -50,7 +50,7 @@ class PointEditor extends Component {
       altInput: true,
       altFormat: `H:i d M`,
       dateFormat: `Z`,
-      defaultDate: this.point.date.start,
+      defaultDate: this.point ? this.point.date.start : Date.now(),
       [`time_24hr`]: true,
       enableTime: true
     });
@@ -60,7 +60,7 @@ class PointEditor extends Component {
       altInput: true,
       altFormat: `H:i d M`,
       dateFormat: `Z`,
-      defaultDate: this.point.date.end,
+      defaultDate: this.point ? this.point.date.end : Date.now(),
       [`time_24hr`]: true,
       enableTime: true
     });
@@ -75,7 +75,8 @@ class PointEditor extends Component {
   }
 
   getDataFromForm() {
-    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, this.point.id);
+    const id = this.point ? this.point.id : ``;
+    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, id);
     return data;
   }
 
@@ -145,6 +146,7 @@ class PointEditor extends Component {
 
   unrender() {
     this.unbind();
+    this._ref.remove();
     this._ref = null;
   }
 }
@@ -159,7 +161,7 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
 
   const [start, end] = [new Date(object[`date-start`]), new Date(object[`date-end`])];
 
-  if (start - end > 0) {
+  if (start - end >= 0) {
     return false;
   }
 

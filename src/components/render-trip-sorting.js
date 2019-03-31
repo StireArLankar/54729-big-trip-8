@@ -1,6 +1,4 @@
-const container = document.querySelector(`.trip-sorting`);
-
-const renderSorting = (filters) => {
+const renderTripSorting = (filters, container) => {
   const content = `
   ${filters.map((filter) => `
     <input type="radio" name="trip-sorting" id="sorting-${filter.name.toLowerCase()}" value=${filter.name.toLowerCase()} ${filter.checked ? `checked` : ``}>
@@ -11,4 +9,4 @@ const renderSorting = (filters) => {
   container.innerHTML = content;
 };
 
-export default renderSorting;
+export default renderTripSorting;

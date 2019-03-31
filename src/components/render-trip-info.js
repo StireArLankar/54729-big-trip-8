@@ -1,12 +1,10 @@
-import {trip as container} from './containers';
-import {printValueWithZero} from '../../common/utils';
+import {printValueWithZero} from '../common/utils';
 
-const iconContainer = container.querySelector(`.trip-icon`);
-const pointsContainer = container.querySelector(`.trip__points`);
-const datesContainer = container.querySelector(`.trip__dates`);
-const costContainer = container.querySelector(`.trip__total-cost`);
-
-const renderTripInfo = ({icon, path, startDate, endDate, totalPrice}) => {
+const renderTripInfo = ({icon, path, startDate, endDate, totalPrice}, container) => {
+  const iconContainer = container.querySelector(`.trip-icon`);
+  const pointsContainer = container.querySelector(`.trip__points`);
+  const datesContainer = container.querySelector(`.trip__dates`);
+  const costContainer = container.querySelector(`.trip__total-cost`);
 
   const date = `${convertDate(startDate)} — ${convertDate(endDate)}`;
 

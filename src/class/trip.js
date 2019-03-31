@@ -1,25 +1,30 @@
 import PointComponent from './point-component';
+import PointEditor from './point-editor';
 import Component from './component';
 
 import {
-  renderSorting,
   renderTripDays,
   renderTripTimes,
   renderTripTypes,
   renderTripPrice
-} from '../components/main';
+} from '../components/point-renders';
 
-import headerFilterList from '../common/header-filter-list';
-import mainSortingList from '../common/main-sorting-list';
-import {renderTripInfo, renderTripFilters} from '../components/header';
+import renderTripSorting from '../components/render-trip-sorting';
+import renderTripInfo from '../components/render-trip-info';
+import renderTripFilters from '../components/render-trip-filters';
+
+import filterList from '../common/filter-list';
+import sortingList from '../common/sorting-list';
 import iconDict from '../common/icon-dict';
 import {convertToDateStart} from '../common/utils';
+
 import ServiceAPI from '../service/service-api';
 import ChartController from './chart-controller';
 
 const container = document.querySelector(`.trip-points`);
 const filtersContainer = document.querySelector(`.trip-filter`);
 const sortingContainer = document.querySelector(`.trip-sorting`);
+const infoContainer = document.querySelector(`.trip`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
@@ -33,8 +38,13 @@ class Trip extends Component {
     this.setViewStats = this.setViewStats.bind(this);
     this.setFilterMethod = this.setFilterMethod.bind(this);
     this.setSortingMethod = this.setSortingMethod.bind(this);
+    this.onNewPointClick = this.onNewPointClick.bind(this);
+    this.onNewPointDelete = this.onNewPointDelete.bind(this);
+    this.onNewPointReset = this.onNewPointReset.bind(this);
+    this.onNewPointSubmit = this.onNewPointSubmit.bind(this);
 
     this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
+    this.newPoint = null;
 
     this._points = [];
     this._renderedPoints = [];
@@ -89,6 +99,10 @@ class Trip extends Component {
     this._renderedPoints.forEach((point) => {
       point.closeEditor();
     });
+    if (this.newPoint) {
+      this.newPoint.unrender();
+      this.newPoint = null;
+    }
   }
 
   _updatePoint(data) {
@@ -134,7 +148,7 @@ class Trip extends Component {
       });
   }
 
-  loadOffers() {
+  _loadOffers() {
     return this.api.getOffers()
       .then((offers) => {
         this.offersArray = offers;
@@ -142,7 +156,7 @@ class Trip extends Component {
       });
   }
 
-  loadDestinations() {
+  _loadDestinations() {
     return this.api.getDestinations()
       .then((destinations) => {
         this.destinationsArray = destinations;
@@ -150,7 +164,7 @@ class Trip extends Component {
       });
   }
 
-  loadPoints() {
+  _loadPoints() {
     return this.api.getPoints()
       .then((points) => {
         this._points.forEach((point) => {
@@ -179,39 +193,86 @@ class Trip extends Component {
   }
 
   start() {
-    this.loadOffers()
-      .then(() => this.loadDestinations())
-      .then(() => this.loadPoints())
+    this._loadOffers()
+      .then(() => this._loadDestinations())
+      .then(() => this._loadPoints())
       .then(() => this.render())
       .catch(() => this.onLoadingError());
 
   }
 
   render() {
-    this.clearTripPoints();
-    this.sortAndFilterPoints();
-    this.renderTripPoints();
-    renderTripInfo(this);
-    this.renderFilters(headerFilterList);
-    this.renderSorting(mainSortingList);
-    this.bind();
+    this._clearBoard();
+    this._sortAndFilterPoints();
+    this._renderTripPoints();
+    this._renderTripInfo();
+    this._renderFilters(filterList);
+    this._renderSorting(sortingList);
+    this._bind();
   }
 
-  unrenderPoints() {
+  _clearBoard() {
     this._points.forEach((point) => {
       point.unrender();
     });
     clearElement(container);
+    container.innerHTML = ``;
   }
 
   update() {
-    this.clearTripPoints();
-    this.sortAndFilterPoints();
-    this.renderTripPoints();
-    renderTripInfo(this);
+    this._clearBoard();
+    this._sortAndFilterPoints();
+    this._renderTripPoints();
+    this._renderTripInfo();
   }
 
-  bind() {
+  onNewPointClick(evt) {
+    evt.preventDefault();
+    this.onEditorOpening();
+    this.newPoint = new PointEditor({
+      point: null,
+      onReset: this.onNewPointReset,
+      onSubmit: this.onNewPointSubmit,
+      onDelete: this.onNewPointDelete,
+      destinationsArray: this.destinationsArray,
+      offersArray: this.offersArray
+    });
+
+    const ref = this.newPoint.render();
+    container.insertAdjacentElement(`afterBegin`, ref);
+  }
+
+  onNewPointDelete() {
+    this.newPoint.unrender();
+    this.newPoint = null;
+  }
+
+  onNewPointReset() {
+    this.newPoint.unrender();
+    this.newPoint = null;
+  }
+
+  onNewPointSubmit(data) {
+    this.api.createPoint({data})
+      .then((result) => this._addNewPoint(result))
+      .catch(() => this.newPoint.onError());
+  }
+
+  _addNewPoint(data) {
+    const point = new PointComponent({
+      data,
+      onEditorOpening: this.onEditorOpening,
+      onPointUpdate: this.onPointUpdate,
+      onPointDelete: this.onPointDelete,
+      destinationsArray: this.destinationsArray,
+      offersArray: this.offersArray
+    });
+    this._points.push(point);
+    this.update();
+  }
+
+  _bind() {
+    document.querySelector(`.trip-controls__new-event`).addEventListener(`click`, this.onNewPointClick);
     this.links.table = document.querySelector(`a[data-href='#table']`);
     this.links.stats = document.querySelector(`a[data-href='#stats']`);
     this.sections.main = document.querySelector(`.main`);
@@ -222,7 +283,7 @@ class Trip extends Component {
     this.chartController.initCharts(this.points);
   }
 
-  unbind() {
+  _unbind() {
     this.links.table.removeEventListener(`click`, this.setViewTable);
     this.links.stats.removeEventListener(`click`, this.setViewStats);
     this.links = null;
@@ -253,7 +314,11 @@ class Trip extends Component {
     this.sections.stats.classList.remove(`visually-hidden`);
   }
 
-  renderFilters(list) {
+  _renderTripInfo() {
+    renderTripInfo(this, infoContainer);
+  }
+
+  _renderFilters(list) {
     renderTripFilters(list, filtersContainer);
     const filtersRadio = filtersContainer.querySelectorAll(`input[name=filter]`);
     filtersRadio.forEach((filter) => {
@@ -261,8 +326,8 @@ class Trip extends Component {
     });
   }
 
-  renderSorting(list) {
-    renderSorting(list, sortingContainer);
+  _renderSorting(list) {
+    renderTripSorting(list, sortingContainer);
     const sortingRadio = sortingContainer.querySelectorAll(`input[name=trip-sorting]`);
     sortingRadio.forEach((sorting) => {
       sorting.addEventListener(`change`, this.setSortingMethod);
@@ -285,12 +350,7 @@ class Trip extends Component {
     }
   }
 
-  clearTripPoints() {
-    this._renderedPoints.forEach((point) => point.unrender());
-    container.innerHTML = ``;
-  }
-
-  renderTripPoints() {
+  _renderTripPoints() {
     switch (this._sortMethod) {
       case `date`: {
         renderTripDays(this._renderedPoints, container, this.startDate);
@@ -314,7 +374,7 @@ class Trip extends Component {
     }
   }
 
-  sortAndFilterPoints() {
+  _sortAndFilterPoints() {
     const sortedPoints = sortPoints(this._points, this._sortMethod);
     const filteredPoints = filterPoints(sortedPoints, this._filterMethod);
     this._renderedPoints = filteredPoints;

@@ -1,4 +1,4 @@
-const filterList = [
+const sortingList = [
   {
     name: `Date`,
     checked: true
@@ -14,4 +14,4 @@ const filterList = [
   }
 ];
 
-export default filterList;
+export default sortingList;

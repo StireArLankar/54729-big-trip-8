@@ -1,32 +1,33 @@
-import iconDict from '../../common/icon-dict';
-import eventList from '../../common/event-list';
-import {withPrepositions} from '../../common/utils';
+import iconDict from '../common/icon-dict';
+import eventList from '../common/event-list';
+import {withPrepositions} from '../common/utils';
 
 const getPointEditingArticle = (point, destinationsArray, offersArray) => {
-  const pictures = point.pictures;
-  const desc = point.description;
-  const price = point.price;
-  const evnt = point.event;
-  const offers = point.offers;
-  const destination = point.destination;
-  const isFavourite = point.isFavourite;
+  const pictures = point ? point.pictures : [];
+  const desc = point ? point.description : ``;
+  const price = point ? point.price : 0;
+  const evnt = point ? point.event : eventList[0];
+  const offers = point ? point.offers : offersArray[0].offers;
+  const destination = point ? point.destination : ``;
+  const isFavourite = point ? point.isFavourite : false;
 
   const article = document.createElement(`article`);
   article.classList.add(`point`);
 
   const offersList = offers.map((offer) => {
-    const id = offer.title.toLowerCase().replace(` `, `-`);
+    const name = offer.title ? offer.title : offer.name;
+    const id = name.toLowerCase().replace(` `, `-`);
     return `
-      <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${offer.title}" ${offer.accepted ? `checked` : ``}>
+      <input class="point__offers-input visually-hidden" type="checkbox" id="${id}" name="offer" value="${name}" ${offer.accepted ? `checked` : ``}>
       <label for="${id}" class="point__offers-label">
-        <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
+        <span class="point__offer-service">${name}</span> + €<span class="point__offer-price">${offer.price}</span>
       </label>
     `;
   }).join(``);
 
   const travelRadio = eventList.map((evt) => {
     return `
-      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${evt.toLowerCase()}" name="travel-way" value="${evt}" ${evt === point.event ? `checked` : ``}>
+      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${evt.toLowerCase()}" name="travel-way" value="${evt}" ${evt === evnt ? `checked` : ``}>
       <label class="travel-way__select-label" for="travel-way-${evt.toLowerCase()}">${iconDict[evt]} ${evt}</label>
     `;
   }).join(``);

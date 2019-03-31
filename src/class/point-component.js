@@ -1,4 +1,4 @@
-import getPointArticle from "../components/main/get-point-article";
+import getPointArticle from '../components/get-point-article';
 import PointModel from './point-model';
 import PointEditor from './point-editor';
 

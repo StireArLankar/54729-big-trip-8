@@ -45,9 +45,7 @@ const convertToDateStart = (number) => {
 };
 
 const printValueWithZero = (value, unit = ``) => {
-  if (value === 0) {
-    return ``;
-  } else if (value < 10) {
+  if (value < 10) {
     return `0${value}${unit}`;
   } else {
     return `${value}${unit}`;
