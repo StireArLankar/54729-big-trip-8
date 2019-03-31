@@ -14,6 +14,12 @@ class ChartController {
         selector: `.statistic__transport`,
         title: `Transport`,
         unit: `x`
+      },
+      timeSpend: {
+        selector: `.statistic__time-spend`,
+        title: `Time distribution`,
+        unit: `H`,
+        unitSecond: true
       }
     };
   }
@@ -21,6 +27,7 @@ class ChartController {
   initCharts(points) {
     this._initMoneyChart(points);
     this._initTransportChart(points);
+    this._initTimeSpendChart(points);
   }
 
   _initMoneyChart(points) {
@@ -41,6 +48,15 @@ class ChartController {
     this.charts.transport.chart = new ChartComponent(this.charts.transport);
   }
 
+  _initTimeSpendChart(points) {
+    const [data, labels] = getTimeSpendStats(points, this.chartLabels);
+
+    this.charts.timeSpend.data = data;
+    this.charts.timeSpend.labels = labels;
+
+    this.charts.timeSpend.chart = new ChartComponent(this.charts.timeSpend);
+  }
+
   _updateMoneyChart(points) {
     const [data, labels] = getMoneyStats(points, this.chartLabels);
     this.charts.money.chart.updateChart(data, labels);
@@ -51,9 +67,15 @@ class ChartController {
     this.charts.transport.chart.updateChart(data, labels);
   }
 
+  _updateTimeSpendChart(points) {
+    const [data, labels] = getTimeSpendStats(points, this.chartLabels);
+    this.charts.timeSpend.chart.updateChart(data, labels);
+  }
+
   updateCharts(points) {
     this._updateMoneyChart(points);
     this._updateTransportChart(points);
+    this._updateTimeSpendChart(points);
   }
 }
 
@@ -75,6 +97,17 @@ const getTransportStats = (points, labels) => {
       return point.event === evt ? acc + 1 : acc;
     }, 0);
     return eventSum;
+  });
+  return [dataSet, labels];
+};
+
+const getTimeSpendStats = (points, labels) => {
+  const dataSet = labels.map((label) => {
+    const [, evt] = label.split(` `);
+    const eventMinutesSum = points.reduce((acc, point) => {
+      return point.event === evt ? acc + point.durationMinutes : acc;
+    }, 0);
+    return (Math.round(eventMinutesSum / 60));
   });
   return [dataSet, labels];
 };

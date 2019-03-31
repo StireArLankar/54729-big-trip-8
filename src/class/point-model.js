@@ -29,12 +29,21 @@ class PointModel extends Component {
     return this._data.event;
   }
 
+  get type() {
+    return this._data.event;
+  }
+
   get price() {
     return this._data.price;
   }
 
   get offers() {
     return this._data.offers;
+  }
+
+  get durationMinutes() {
+    const temp = (this._data.date.end - this._data.date.start) / (60 * 1000);
+    return temp;
   }
 
   get totalPrice() {

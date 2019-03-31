@@ -44,4 +44,14 @@ const convertToDateStart = (number) => {
   return new Date(year, month, day);
 };
 
-export {withPrepositions, printTime, convertToDateStart};
+const printValueWithZero = (value, unit = ``) => {
+  if (value === 0) {
+    return ``;
+  } else if (value < 10) {
+    return `0${value}${unit}`;
+  } else {
+    return `${value}${unit}`;
+  }
+};
+
+export {withPrepositions, printTime, convertToDateStart, printValueWithZero};

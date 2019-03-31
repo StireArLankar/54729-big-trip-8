@@ -1,6 +1,14 @@
 import PointComponent from './point-component';
 import Component from './component';
-import {renderTripPoints, renderSorting} from '../components/main';
+
+import {
+  renderSorting,
+  renderTripDays,
+  renderTripTimes,
+  renderTripTypes,
+  renderTripPrice
+} from '../components/main';
+
 import headerFilterList from '../common/header-filter-list';
 import mainSortingList from '../common/main-sorting-list';
 import {renderTripInfo, renderTripFilters} from '../components/header';
@@ -11,6 +19,7 @@ import ChartController from './chart-controller';
 
 const container = document.querySelector(`.trip-points`);
 const filtersContainer = document.querySelector(`.trip-filter`);
+const sortingContainer = document.querySelector(`.trip-sorting`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
@@ -23,13 +32,14 @@ class Trip extends Component {
     this.setViewTable = this.setViewTable.bind(this);
     this.setViewStats = this.setViewStats.bind(this);
     this.setFilterMethod = this.setFilterMethod.bind(this);
+    this.setSortingMethod = this.setSortingMethod.bind(this);
 
     this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
 
     this._points = [];
     this._renderedPoints = [];
-    this._icon = iconDict.Taxi;
-    this._sortMethod = `Date`;
+    this._icon = iconDict.Flight;
+    this._sortMethod = `date`;
     this._filterMethod = `Everything`;
 
     this.state = {
@@ -47,8 +57,6 @@ class Trip extends Component {
     };
 
     this.chartController = null;
-
-    this.setFilterMethod = this.setFilterMethod.bind(this);
   }
 
   get points() {
@@ -185,7 +193,7 @@ class Trip extends Component {
     this.renderTripPoints();
     renderTripInfo(this);
     this.renderFilters(headerFilterList);
-    renderSorting(mainSortingList);
+    this.renderSorting(mainSortingList);
     this.bind();
   }
 
@@ -204,8 +212,8 @@ class Trip extends Component {
   }
 
   bind() {
-    this.links.table = document.querySelector(`a[href='#table']`);
-    this.links.stats = document.querySelector(`a[href='#stats']`);
+    this.links.table = document.querySelector(`a[data-href='#table']`);
+    this.links.stats = document.querySelector(`a[data-href='#stats']`);
     this.sections.main = document.querySelector(`.main`);
     this.sections.stats = document.querySelector(`.statistic`);
     this.links.table.addEventListener(`click`, this.setViewTable);
@@ -238,7 +246,7 @@ class Trip extends Component {
       return;
     }
     this.state.isStatisticShown = true;
-    this.chartController.updateCharts(this._points);
+    this.chartController.updateCharts(this._renderedPoints);
     this.links.table.classList.remove(`view-switch__item--active`);
     this.links.stats.classList.add(`view-switch__item--active`);
     this.sections.main.classList.add(`visually-hidden`);
@@ -253,9 +261,28 @@ class Trip extends Component {
     });
   }
 
+  renderSorting(list) {
+    renderSorting(list, sortingContainer);
+    const sortingRadio = sortingContainer.querySelectorAll(`input[name=trip-sorting]`);
+    sortingRadio.forEach((sorting) => {
+      sorting.addEventListener(`change`, this.setSortingMethod);
+    });
+  }
+
   setFilterMethod(evt) {
     this._filterMethod = evt.target.value;
     this.update();
+    if (this.state.isStatisticShown) {
+      this.chartController.updateCharts(this._renderedPoints);
+    }
+  }
+
+  setSortingMethod(evt) {
+    this._sortMethod = evt.target.value;
+    this.update();
+    if (this.state.isStatisticShown) {
+      this.chartController.updateCharts(this._renderedPoints);
+    }
   }
 
   clearTripPoints() {
@@ -264,7 +291,27 @@ class Trip extends Component {
   }
 
   renderTripPoints() {
-    renderTripPoints(this._renderedPoints, this.startDate, container);
+    switch (this._sortMethod) {
+      case `date`: {
+        renderTripDays(this._renderedPoints, container, this.startDate);
+        break;
+      }
+      case `type`: {
+        renderTripTypes(this._renderedPoints, container);
+        break;
+      }
+      case `time`: {
+        renderTripTimes(this._renderedPoints, container);
+        break;
+      }
+      case `price`: {
+        renderTripPrice(this._renderedPoints, container);
+        break;
+      }
+      default : {
+        renderTripDays(this._renderedPoints, container, this.startDate);
+      }
+    }
   }
 
   sortAndFilterPoints() {
@@ -276,8 +323,17 @@ class Trip extends Component {
 
 const sortPoints = (points, method) => {
   switch (method) {
-    case `Date`: {
+    case `date`: {
       return sortPointsByDate(points);
+    }
+    case `type`: {
+      return points;
+    }
+    case `time`: {
+      return sortPointsByDuration(points);
+    }
+    case `price`: {
+      return sortPointsByPrice(points);
     }
     default : {
       return points;
@@ -288,6 +344,18 @@ const sortPoints = (points, method) => {
 const sortPointsByDate = (points) => {
   return [...points].sort((a, b) => {
     return a.date.start - b.date.start;
+  });
+};
+
+const sortPointsByDuration = (points) => {
+  return [...points].sort((a, b) => {
+    return a.durationMinutes - b.durationMinutes;
+  });
+};
+
+const sortPointsByPrice = (points) => {
+  return [...points].sort((a, b) => {
+    return a.price - b.price;
   });
 };
 

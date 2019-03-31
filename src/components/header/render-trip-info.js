@@ -1,4 +1,5 @@
 import {trip as container} from './containers';
+import {printValueWithZero} from '../../common/utils';
 
 const iconContainer = container.querySelector(`.trip-icon`);
 const pointsContainer = container.querySelector(`.trip__points`);
@@ -19,7 +20,7 @@ const convertDate = (date) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  return `${printValueWithZero(day)}.${printValueWithZero(month)}.${year}`;
 };
 
 export default renderTripInfo;

@@ -1,13 +1,16 @@
 const filterList = [
   {
-    name: `Event`,
+    name: `Date`,
     checked: true
+  },
+  {
+    name: `Type`,
   },
   {
     name: `Time`,
   },
   {
-    name: `Price`,
+    name: `Price`
   }
 ];
 
