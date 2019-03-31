@@ -1,6 +1,6 @@
-const withPrepositions = (event) => {
+const withPrepositions = (type) => {
   let prep;
-  switch (event) {
+  switch (type) {
     case (`Taxi`):
     case (`Bus`):
     case (`Train`):
@@ -21,7 +21,7 @@ const withPrepositions = (event) => {
       prep = ``;
     }
   }
-  return `${event} ${prep}`;
+  return `${type} ${prep}`;
 };
 
 const printTime = (start, end) => {

@@ -1,12 +1,12 @@
 import iconDict from '../common/icon-dict';
-import eventList from '../common/event-list';
+import typeList from '../common/type-list';
 import {withPrepositions} from '../common/utils';
 
 const getPointEditingArticle = (point, destinationsArray, offersArray) => {
   const pictures = point ? point.pictures : [];
   const desc = point ? point.description : ``;
   const price = point ? point.price : 0;
-  const evnt = point ? point.event : eventList[0];
+  const type = point ? point.type : typeList[0];
   const offers = point ? point.offers : offersArray[0].offers;
   const destination = point ? point.destination : ``;
   const isFavourite = point ? point.isFavourite : false;
@@ -25,16 +25,16 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
     `;
   }).join(``);
 
-  const travelRadio = eventList.map((evt) => {
+  const travelRadio = typeList.map((item) => {
     return `
-      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${evt.toLowerCase()}" name="travel-way" value="${evt}" ${evt === evnt ? `checked` : ``}>
-      <label class="travel-way__select-label" for="travel-way-${evt.toLowerCase()}">${iconDict[evt]} ${evt}</label>
+      <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.toLowerCase()}" name="travel-way" value="${item}" ${item === type ? `checked` : ``}>
+      <label class="travel-way__select-label" for="travel-way-${item.toLowerCase()}">${iconDict[item]} ${item}</label>
     `;
   }).join(``);
 
   const travelWay = `
     <div class="travel-way">
-      <label class="travel-way__label" for="travel-way__toggle">${iconDict[evnt]}</label>
+      <label class="travel-way__label" for="travel-way__toggle">${iconDict[type]}</label>
 
       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -56,7 +56,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
         ${travelWay}
 
         <div class="point__destination-wrap">
-          <label class="point__destination-label" for="destination">${withPrepositions(evnt)}</label>
+          <label class="point__destination-label" for="destination">${withPrepositions(type)}</label>
           <input class="point__destination-input" list="destination-select" id="destination" value="${destination}" name="destination">
           <datalist id="destination-select">
             ${destinationList}

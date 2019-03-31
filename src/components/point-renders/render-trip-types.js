@@ -3,7 +3,7 @@ import iconDict from '../../common/icon-dict';
 
 const splitPointsToTypes = (points, iconsDict) => {
   const types = Object.entries(iconsDict).map((entry) => {
-    const filteredPoints = points.filter((point) => point.event === entry[0]);
+    const filteredPoints = points.filter((point) => point.type === entry[0]);
     const type = {
       icon: entry[1],
       type: entry[0],

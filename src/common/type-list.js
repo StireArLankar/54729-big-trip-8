@@ -1,4 +1,4 @@
-const eventList = [
+const typeList = [
   `Taxi`,
   `Bus`,
   `Train`,
@@ -11,4 +11,4 @@ const eventList = [
   // `Restaurant`
 ];
 
-export default eventList;
+export default typeList;

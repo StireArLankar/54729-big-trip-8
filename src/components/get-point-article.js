@@ -2,11 +2,11 @@ import iconDict from '../common/icon-dict';
 import {printTime, withPrepositions, printValueWithZero} from '../common/utils';
 
 
-const getPointArticle = ({event, destination, date: {start, end}, price, offers}) => {
-  const iconEmoji = iconDict[event];
+const getPointArticle = ({type, destination, date: {start, end}, price, offers}) => {
+  const iconEmoji = iconDict[type];
   const diff = end - start;
   const [day, hour, min] = getTime(diff);
-  const title = `${withPrepositions(event)} ${destination}`;
+  const title = `${withPrepositions(type)} ${destination}`;
 
   const offersList = offers.map((offer) => {
     return offer.accepted ? `

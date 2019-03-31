@@ -5,7 +5,7 @@ class PointModel extends Component {
     super();
     this._data = {
       id: Number(data.id),
-      event: convertTypeToEvent(data.type),
+      type: convertType(data.type),
       destination: data.destination,
       price: data.base_price,
       offers: data.offers,
@@ -25,12 +25,8 @@ class PointModel extends Component {
     return this._data.destination.name;
   }
 
-  get event() {
-    return this._data.event;
-  }
-
   get type() {
-    return this._data.event;
+    return this._data.type;
   }
 
   get price() {
@@ -81,7 +77,7 @@ class PointModel extends Component {
   static raw(data) {
     return {
       [`id`]: data.id.toString(),
-      [`type`]: data.event.toLowerCase(),
+      [`type`]: data.type.toLowerCase(),
       [`destination`]: {
         [`name`]: data.destination.name,
         [`description`]: data.destination.description,
@@ -96,7 +92,7 @@ class PointModel extends Component {
   }
 }
 
-const convertTypeToEvent = (type) => {
+const convertType = (type) => {
   const temp = type.slice(0, 1).toUpperCase() + type.slice(1);
   return temp;
 };

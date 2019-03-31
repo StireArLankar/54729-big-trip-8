@@ -165,10 +165,10 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
     return false;
   }
 
-  const evt = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
+  const type = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
 
   const offersElements = form.querySelectorAll(`.point__offers-input`);
-  const offers = getNewOffers([...offersElements], evt, offersArray);
+  const offers = getNewOffers([...offersElements], type, offersArray);
 
   const destination = getNewDestination(object.destination, destinationsArray);
 
@@ -180,7 +180,7 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
 
   const data = {
     destination,
-    event: evt,
+    type,
     price: Number(object.price),
     offers,
     date: {
@@ -198,8 +198,8 @@ const getNewDestination = (name, destArray) => {
   return destArray.find((dest) => dest.name === name);
 };
 
-const getNewOffers = (checkboxes, evt, offersArray) => {
-  const type = evt.toLowerCase();
+const getNewOffers = (checkboxes, rawType, offersArray) => {
+  const type = rawType.toLowerCase();
   const typedOffersIndex = offersArray.findIndex((element) => element.type === type);
   const typedOffers = offersArray[typedOffersIndex].offers;
   return typedOffers.map((offer) => {

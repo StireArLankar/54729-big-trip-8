@@ -81,33 +81,33 @@ class ChartController {
 
 const getMoneyStats = (points, labels) => {
   const dataSet = labels.map((label) => {
-    const [, evt] = label.split(` `);
-    const eventSum = points.reduce((acc, point) => {
-      return point.event === evt ? acc + point.totalPrice : acc;
+    const [, type] = label.split(` `);
+    const typeSum = points.reduce((acc, point) => {
+      return point.type === type ? acc + point.totalPrice : acc;
     }, 0);
-    return eventSum;
+    return typeSum;
   });
   return [dataSet, labels];
 };
 
 const getTransportStats = (points, labels) => {
   const dataSet = labels.map((label) => {
-    const [, evt] = label.split(` `);
-    const eventSum = points.reduce((acc, point) => {
-      return point.event === evt ? acc + 1 : acc;
+    const [, type] = label.split(` `);
+    const typeSum = points.reduce((acc, point) => {
+      return point.type === type ? acc + 1 : acc;
     }, 0);
-    return eventSum;
+    return typeSum;
   });
   return [dataSet, labels];
 };
 
 const getTimeSpendStats = (points, labels) => {
   const dataSet = labels.map((label) => {
-    const [, evt] = label.split(` `);
-    const eventMinutesSum = points.reduce((acc, point) => {
-      return point.event === evt ? acc + point.durationMinutes : acc;
+    const [, type] = label.split(` `);
+    const typeMinutesSum = points.reduce((acc, point) => {
+      return point.type === type ? acc + point.durationMinutes : acc;
     }, 0);
-    return (Math.round(eventMinutesSum / 60));
+    return (Math.round(typeMinutesSum / 60));
   });
   return [dataSet, labels];
 };
