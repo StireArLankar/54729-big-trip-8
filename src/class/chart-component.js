@@ -4,17 +4,18 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 const BAR_HEIGHT = 55;
 
 class ChartComponent {
-  constructor({name, unit, selector, labels, data}) {
+  constructor({title, unit, selector, labels, data, unitSecond}) {
     this._ref = document.querySelector(selector);
     this._chart = null;
-    this.name = name;
+    this.title = title;
     this.unit = unit;
     this.labels = labels;
-    this.data = data;
+    this.dataArray = data;
+    this.unitSecond = unitSecond ? true : false;
   }
 
   updateChart(data) {
-    this.data = data;
+    this.dataArray = data;
     if (this._chart) {
       this._chart.destroy();
     } else {
@@ -25,7 +26,7 @@ class ChartComponent {
   }
 }
 
-const getChartOptions = ({labels, data, unit, name}) => {
+const getChartOptions = ({unitSecond, labels, dataArray: data, unit, title}) => {
   return {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
@@ -47,12 +48,12 @@ const getChartOptions = ({labels, data, unit, name}) => {
           color: `#000000`,
           anchor: `end`,
           align: `start`,
-          formatter: (val) => `${unit} ${val}`
+          formatter: (val) => unitSecond ? `${val} ${unit}` : `${unit} ${val}`
         }
       },
       title: {
         display: true,
-        text: name,
+        text: title,
         fontColor: `#000000`,
         fontSize: 23,
         position: `left`

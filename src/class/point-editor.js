@@ -1,13 +1,23 @@
 import Component from './component';
+import PointModel from './point-model';
 import flatpickr from 'flatpickr';
 import getPointEditingArticle from '../components/get-point-editing-article';
 
 class PointEditor extends Component {
-  constructor(point) {
+  constructor({point, onReset, onSubmit, onDelete, destinationsArray, offersArray}) {
     super();
     this.point = point;
     this._ref = null;
     this._form = null;
+
+    this.cb = {
+      onReset,
+      onSubmit,
+      onDelete
+    };
+
+    this.destinationsArray = destinationsArray;
+    this.offersArray = offersArray;
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onReset = this.onReset.bind(this);
@@ -16,67 +26,113 @@ class PointEditor extends Component {
   }
 
   get template() {
-    return getPointEditingArticle(this.point);
+    return getPointEditingArticle(this.point, this.destinationsArray, this.offersArray);
   }
 
   render() {
-    const card = this.point.reference;
-    const container = card.parentNode;
     this._ref = this.template;
-
     this._form = this._ref.querySelector(`form`);
-
     this.bind();
-
-    container.replaceChild(this._ref, card);
     return this._ref;
   }
 
   bind() {
-    this._form.addEventListener(`submit`, this.onSubmit);
+    // this._form.addEventListener(`submit`, this.onSubmit);
     this._form.addEventListener(`reset`, this.onReset);
     document.addEventListener(`keydown`, this.onEscDown);
+    this._form.querySelector(`.point__button--save`).addEventListener(`click`, this.onSubmit);
     this._form.querySelector(`.point__button--delete`).addEventListener(`click`, this.onDelete);
 
-    const date = this._form.querySelector(`.point__date`);
-    const dateInput = date.querySelector(`.point__input`);
-    date.style.display = `block`;
-    flatpickr(dateInput, {
+    const label = this._form.querySelector(`.point__time`);
+    label.style.width = `280px`;
+    const startDateInput = label.querySelector(`.point__input[name=date-start]`);
+    flatpickr(startDateInput, {
       altInput: true,
-      altFormat: `M d`,
-      dateFormat: `d-n`,
-      defaultDate: this.point.date.start
+      altFormat: `H:i d M`,
+      dateFormat: `Z`,
+      defaultDate: this.point ? this.point.date.start : Date.now(),
+      [`time_24hr`]: true,
+      enableTime: true
+    });
+
+    const endDateInput = label.querySelector(`.point__input[name=date-end]`);
+    flatpickr(endDateInput, {
+      altInput: true,
+      altFormat: `H:i d M`,
+      dateFormat: `Z`,
+      defaultDate: this.point ? this.point.date.end : Date.now(),
+      [`time_24hr`]: true,
+      enableTime: true
     });
 
   }
 
   unbind() {
-    this._form.removeEventListener(`submit`, this.onSubmit);
     this._form.removeEventListener(`reset`, this.onReset);
     document.removeEventListener(`keydown`, this.onEscDown);
+    this._form.querySelector(`.point__button--save`).removeEventListener(`click`, this.onSubmit);
     this._form.querySelector(`.point__button--delete`).removeEventListener(`click`, this.onDelete);
   }
 
   getDataFromForm() {
-    const data = formDataConverter(this._form, this.point);
+    const id = this.point ? this.point.id : ``;
+    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, id);
     return data;
+  }
+
+  onReset(evt) {
+    evt.preventDefault();
+    this.cb.onReset();
+  }
+
+  onDelete(evt) {
+    evt.preventDefault();
+    this.block();
+    this.cb.onDelete();
   }
 
   onSubmit(evt) {
     evt.preventDefault();
     const data = this.getDataFromForm();
-    this.point.update(data);
-    this.point.closeEditor();
+    if (data) {
+      const pointData = PointModel.raw(data);
+      this.block();
+      this.cb.onSubmit(pointData);
+    } else {
+      this.shake();
+    }
   }
 
-  onReset(evt) {
-    evt.preventDefault();
-    this.point.closeEditor();
+  onError() {
+    this.shake();
+    this.unblock();
   }
 
-  onDelete(evt) {
-    evt.preventDefault();
-    this.point.delete();
+  shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._ref.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this._ref.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
+  block() {
+    const saveBtn = this._ref.querySelector(`.point__button--save`);
+    const deletBtn = this._ref.querySelector(`.point__button--delete`);
+    saveBtn.disabled = true;
+    deletBtn.disabled = true;
+    saveBtn.textContent = `..........`;
+    deletBtn.textContent = `.............`;
+  }
+
+  unblock() {
+    const saveBtn = this._ref.querySelector(`.point__button--save`);
+    const deletBtn = this._ref.querySelector(`.point__button--delete`);
+    saveBtn.disabled = false;
+    deletBtn.disabled = false;
+    saveBtn.textContent = `Save`;
+    deletBtn.textContent = `Delete`;
   }
 
   onEscDown(evt) {
@@ -89,66 +145,72 @@ class PointEditor extends Component {
   }
 
   unrender() {
-    const card = this.point.reference;
-    const container = this._ref.parentNode;
-
-    container.replaceChild(card, this._ref);
-
     this.unbind();
+    this._ref.remove();
     this._ref = null;
   }
 }
 
-const timeExtracter = (startDate, endDate, date, time) => {
-  const [startTime, endTime] = time.split(` — `);
-  const [startHour, startMin] = startTime.split(`:`);
-  const [endHour, endMin] = endTime.split(`:`);
-  const [day, month] = date.split(`-`);
-  const start = dataUpgrader(startDate, month, day, startHour, startMin);
-  const end = dataUpgrader(endDate, month, day, endHour, endMin);
-  return [start, end];
-};
-
-const formDataConverter = (form, oldData) => {
+const formDataConverter = (form, offersArray, destinationsArray, id) => {
   const formData = new FormData(form);
   const object = {};
-  const oldStart = oldData.date.start;
-  const oldEnd = oldData.date.end;
 
   for (let pair of formData.entries()) {
     object[pair[0]] = pair[1];
   }
 
-  const [start, end] = timeExtracter(oldStart, oldEnd, object.day, object.time);
-  const evt = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
+  const [start, end] = [new Date(object[`date-start`]), new Date(object[`date-end`])];
+
+  if (start - end >= 0) {
+    return false;
+  }
+
+  const type = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
 
   const offersElements = form.querySelectorAll(`.point__offers-input`);
-  const offersCheck = [...offersElements].map((offer) => offer.checked);
-  const offers = oldData.offers.map((offer, index) => {
-    const temp = Object.assign({}, offer);
-    temp.checked = offersCheck[index];
-    return temp;
-  });
+  const offers = getNewOffers([...offersElements], type, offersArray);
+
+  const destination = getNewDestination(object.destination, destinationsArray);
+
+  if (!destination) {
+    return false;
+  }
+
+  const isFavourite = form.querySelector(`.point__favorite-input`).checked;
 
   const data = {
-    destination: object.destination,
-    event: evt,
+    destination,
+    type,
     price: Number(object.price),
     offers,
     date: {
       start,
       end
-    }
+    },
+    isFavourite,
+    id
   };
 
   return data;
 };
 
-const dataUpgrader = (date, month, day, hour, min) => {
-  const temp = new Date(date);
-  temp.setMonth(month - 1, day);
-  temp.setHours(hour, min);
-  return temp;
+const getNewDestination = (name, destArray) => {
+  return destArray.find((dest) => dest.name === name);
+};
+
+const getNewOffers = (checkboxes, rawType, offersArray) => {
+  const type = rawType.toLowerCase();
+  const typedOffersIndex = offersArray.findIndex((element) => element.type === type);
+  const typedOffers = offersArray[typedOffersIndex].offers;
+  return typedOffers.map((offer) => {
+    const checkbox = checkboxes.find((cbhox) => cbhox.value === offer.name);
+    const accepted = checkbox ? checkbox.checked : false;
+    return {
+      title: offer.name,
+      price: offer.price,
+      accepted
+    };
+  });
 };
 
 export default PointEditor;

@@ -1,8 +1,8 @@
-import {getTestPointList} from './mock';
 import Trip from './class/trip';
 
-const testPoints = getTestPointList(6);
+let trip;
 
-
-const testTrip = new Trip(testPoints);
-testTrip.render();
+window.addEventListener(`load`, () => {
+  trip = new Trip();
+  trip.start();
+});

@@ -2,13 +2,13 @@ const iconDict = {
   [`Taxi`]: `🚕`,
   [`Bus`]: `🚌`,
   [`Train`]: `🚂`,
-  [`Ship`]: `🛳️`,
-  [`Transport`]: `🚊`,
-  [`Drive`]: `🚗`,
+  // [`Ship`]: `🛳️`,
+  // [`Transport`]: `🚊`,
+  // [`Drive`]: `🚗`,
   [`Flight`]: `✈️`,
   [`Check-in`]: `🏨`,
   [`Sightseeing`]: `🏛️`,
-  [`Restaurant`]: `🍴`
+  // [`Restaurant`]: `🍴`
 };
 
 export default iconDict;

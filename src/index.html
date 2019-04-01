@@ -17,16 +17,16 @@
     <section class="trip">
       <div class="trip__schedule">
         <i class="trip-icon">⛰️</i>
-        <h1 class="trip__points">Amsterdam&nbsp;&mdash; Geneva&nbsp;&mdash;  Chamonix</h1>
-        <p class="trip__dates">Mar 17&nbsp;&mdash; 19</p>
+        <h1 class="trip__points">Trip Title</h1>
+        <p class="trip__dates">Trip Dates</p>
       </div>
-      <p class="trip__total">Total: <span class="trip__total-cost">&euro;&nbsp;1500</span></p>
+      <p class="trip__total">Total: <span class="trip__total-cost">&euro;&nbsp;0</span></p>
     </section>
 
     <section class="trip-controls">
       <nav class="trip-controls__menus view-switch">
-        <a href="#table" class="view-switch__item view-switch__item--active">Table</a>
-        <a href="#stats" class="view-switch__item">Stats</a>
+        <a href="javascript:void(0)" class="view-switch__item view-switch__item--active" data-href="#table">Table</a>
+        <a href="javascript:void(0)" class="view-switch__item" data-href="#stats">Stats</a>
 
         <form class="trip-filter">
           <input type="radio" id="filter-everything" name="filter" value="everything" checked>
@@ -48,91 +48,21 @@
 
 <main class="main content-wrap" id="table">
   <form class="trip-sorting">
-    <input type="radio" name="trip-sorting" id="sorting-event" value="event" checked>
-    <label class="trip-sorting__item trip-sorting__item--event" for="sorting-event">Event</label>
+    <input type="radio" name="trip-sorting" id="sorting-date" value="date" checked="">
+    <label class="trip-sorting__item trip-sorting__item--date" for="sorting-date">Date</label>
+
+    <input type="radio" name="trip-sorting" id="sorting-type" value="type">
+    <label class="trip-sorting__item trip-sorting__item--type" for="sorting-type">Type</label>
 
     <input type="radio" name="trip-sorting" id="sorting-time" value="time">
     <label class="trip-sorting__item trip-sorting__item--time" for="sorting-time">Time</label>
 
     <input type="radio" name="trip-sorting" id="sorting-price" value="price">
     <label class="trip-sorting__item trip-sorting__item--price" for="sorting-price">Price</label>
-
-    <span class="trip-sorting__item trip-sorting__item--offers">Offers</span>
   </form>
 
   <section class="trip-points">
-    <section class="trip-day">
-      <article class="trip-day__info">
-        <span class="trip-day__caption">Day</span>
-        <p class="trip-day__number">1</p>
-        <h2 class="trip-day__title">Mar 18</h2>
-      </article>
-
-      <div class="trip-day__items">
-        <article class="trip-point">
-          <i class="trip-icon">🚕</i>
-          <h3 class="trip-point__title">Taxi to Airport</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">10:00&nbsp;&mdash; 11:00</span>
-            <span class="trip-point__duration">1h 30m</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;20</p>
-          <ul class="trip-point__offers">
-            <li>
-              <button class="trip-point__offer">Order UBER +&euro;&nbsp;20</button>
-            </li>
-            <li>
-              <button class="trip-point__offer">Upgrade to business +&euro;&nbsp;20</button>
-            </li>
-          </ul>
-        </article>
-        <article class="trip-point">
-          <i class="trip-icon">✈️</i>
-          <h3 class="trip-point__title">Flight to Geneva</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">10:00&nbsp;&mdash; 11:00</span>
-            <span class="trip-point__duration">1h 30m</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;20</p>
-          <ul class="trip-point__offers">
-            <li>
-              <button class="trip-point__offer">Upgrade to business +&euro;&nbsp;20</button>
-            </li>
-            <li>
-              <button class="trip-point__offer">Select meal +&euro;&nbsp;20</button>
-            </li>
-          </ul>
-        </article>
-        <article class="trip-point">
-          <i class="trip-icon">🚗</i>
-          <h3 class="trip-point__title">Drive to Chamonix</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">10:00&nbsp;&mdash; 11:00</span>
-            <span class="trip-point__duration">1h 30m</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;20</p>
-          <ul class="trip-point__offers">
-            <li>
-                <button class="trip-point__offer">Rent a car +&euro;&nbsp;200</button>
-              </li>
-          </ul>
-        </article>
-        <article class="trip-point">
-          <i class="trip-icon">🏨</i>
-          <h3 class="trip-point__title">Check into a hotel</h3>
-          <p class="trip-point__schedule">
-            <span class="trip-point__timetable">10:00&nbsp;&mdash; 11:00</span>
-            <span class="trip-point__duration">1h 30m</span>
-          </p>
-          <p class="trip-point__price">&euro;&nbsp;20</p>
-          <ul class="trip-point__offers">
-            <li>
-              <button class="trip-point__offer">Add breakfast +&euro;&nbsp;20</button>
-            </li>
-          </ul>
-        </article>
-      </div>
-    </section>
+    <div class="trip__loading">Loading Route...</div>
   </section>
 </main>
 

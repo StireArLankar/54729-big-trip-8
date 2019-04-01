@@ -1,6 +1,6 @@
-const withPrepositions = (event) => {
+const withPrepositions = (type) => {
   let prep;
-  switch (event) {
+  switch (type) {
     case (`Taxi`):
     case (`Bus`):
     case (`Train`):
@@ -21,7 +21,7 @@ const withPrepositions = (event) => {
       prep = ``;
     }
   }
-  return `${event} ${prep}`;
+  return `${type} ${prep}`;
 };
 
 const printTime = (start, end) => {
@@ -44,4 +44,12 @@ const convertToDateStart = (number) => {
   return new Date(year, month, day);
 };
 
-export {withPrepositions, printTime, convertToDateStart};
+const printValueWithZero = (value, unit = ``) => {
+  if (value < 10) {
+    return `0${value}${unit}`;
+  } else {
+    return `${value}${unit}`;
+  }
+};
+
+export {withPrepositions, printTime, convertToDateStart, printValueWithZero};

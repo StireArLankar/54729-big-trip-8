@@ -1,4 +1,4 @@
-import getDaySection from './get-day-section';
+import getPointsSection from './get-points-section';
 import {convertToDateStart} from '../../common/utils';
 
 const getDayDifference = (first, last) => {
@@ -7,10 +7,9 @@ const getDayDifference = (first, last) => {
   return Math.floor(diff / oneDay);
 };
 
-const clearElement = (el) => {
-  while (el.children.length > 0) {
-    el.removeChild(el.lastChild);
-  }
+const printDate = (date) => {
+  const [, month, day] = date.toDateString().split(` `);
+  return `${month} ${day}`;
 };
 
 const splitPointsToDays = (points, start) => {
@@ -35,16 +34,22 @@ const splitPointsToDays = (points, start) => {
   }, []);
 };
 
-const renderTripPoints = (points, start, container) => {
+const renderTripDays = (points, container, start) => {
   const days = splitPointsToDays(points, start);
-
   const fragment = document.createDocumentFragment();
+
   days.forEach((day) => {
-    fragment.appendChild(getDaySection(day));
+    const options = {
+      caption: `Day`,
+      icon: day.index,
+      label: printDate(day.date),
+      points: day.points
+    };
+    fragment.appendChild(getPointsSection(options));
   });
 
-  clearElement(container);
   container.appendChild(fragment);
 };
 
-export default renderTripPoints;
+export default renderTripDays;
+
