@@ -18,7 +18,7 @@ import Sortings from '../common/sortings';
 import iconDict from '../common/icon-dict';
 import {convertToDateStart} from '../common/utils';
 
-import ServiceAPI from '../service/service-api';
+import Provider from './provider';
 import ChartController from './chart-controller';
 
 const container = document.querySelector(`.trip-points`);
@@ -44,7 +44,7 @@ class Trip extends Component {
     this.onNewPointReset = this.onNewPointReset.bind(this);
     this.onNewPointSubmit = this.onNewPointSubmit.bind(this);
 
-    this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
+    this.provider = new Provider({endPoint: END_POINT, authorization: AUTHORIZATION});
     this.newPoint = null;
 
     this._points = [];
@@ -122,7 +122,7 @@ class Trip extends Component {
   }
 
   onPointUpdate(data, pointComponent) {
-    this.api.updatePoint({id: data.id, data})
+    this.provider.updatePoint({id: data.id, data})
       .then((updatedData) => this._updatePoint(updatedData))
       .then(() => this.update())
       .catch(() => {
@@ -141,7 +141,7 @@ class Trip extends Component {
   }
 
   onPointDelete(id, pointComponent) {
-    this.api.deletePoint({id})
+    this.provider.deletePoint({id})
       .then(() => this._deletePoint(id))
       .then(() => this.update())
       .catch(() => {
@@ -150,21 +150,21 @@ class Trip extends Component {
   }
 
   _loadOffers() {
-    return this.api.getOffers()
+    return this.provider.getOffers()
       .then((offers) => {
         this.Offers = offers;
       });
   }
 
   _loadDestinations() {
-    return this.api.getDestinations()
+    return this.provider.getDestinations()
       .then((destinations) => {
         this.Destinations = destinations;
       });
   }
 
   _loadPoints() {
-    return this.api.getPoints()
+    return this.provider.getPoints()
       .then((points) => {
         this._points.forEach((point) => {
           point.closeEditor();
@@ -250,7 +250,7 @@ class Trip extends Component {
   }
 
   onNewPointSubmit(data) {
-    this.api.createPoint({data})
+    this.provider.createPoint({data})
       .then((result) => this._addNewPoint(result))
       .catch(() => this.newPoint.onError());
   }
@@ -269,6 +269,17 @@ class Trip extends Component {
   }
 
   _bind() {
+    window.addEventListener(`offline`, () => {
+      document.title = `${document.title}[OFFLINE]`;
+    });
+    window.addEventListener(`online`, () => {
+      document.title = document.title.split(`[OFFLINE]`)[0];
+      this.provider.syncPoints()
+        .then(() => this._loadPoints())
+        .then(() => this.update())
+        .catch(() => this.onLoadingError());
+    });
+
     document.querySelector(`.trip-controls__new-event`).addEventListener(`click`, this.onNewPointClick);
     this.links.table = document.querySelector(`a[data-href='#table']`);
     this.links.stats = document.querySelector(`a[data-href='#stats']`);
