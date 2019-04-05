@@ -17,16 +17,16 @@ class Provider {
     this._destinationsStore = new Store({key: DESTINATIONS_STORE_KEY, storage: localStorage});
 
     this._generateId = generateId;
-    this._needSync = false;
+    this._needSync = true;
   }
 
   getPoints() {
-    if (this._isOnline && this._needSync) {
+    if (this._isOnline() && this._needSync) {
       this._needSync = false;
       this._store.removeAll();
     }
 
-    if (this._isOnline) {
+    if (this._isOnline()) {
       return this._api.getPoints()
       .then((points) => {
         points.forEach((point) => this._store.setItem({key: point.id, item: point}));
@@ -41,7 +41,7 @@ class Provider {
   }
 
   getDestinations() {
-    if (this._isOnline) {
+    if (this._isOnline()) {
       return this._api.getDestinations()
       .then((destinations) => {
         destinations.forEach((dest, index) => this._destinationsStore.setItem({key: index, item: dest}));
@@ -56,7 +56,7 @@ class Provider {
   }
 
   getOffers() {
-    if (this._isOnline) {
+    if (this._isOnline()) {
       return this._api.getOffers()
       .then((offers) => {
         offers.forEach((offer, index) => this._offersStore.setItem({key: index, item: offer}));
