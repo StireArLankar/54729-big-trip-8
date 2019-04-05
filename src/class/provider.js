@@ -17,7 +17,7 @@ class Provider {
     this._destinationsStore = new Store({key: DESTINATIONS_STORE_KEY, storage: localStorage});
 
     this._generateId = generateId;
-    this._needSync = false;
+    this._needSync = true;
   }
 
   getPoints() {
