@@ -27,6 +27,7 @@ const sortingContainer = document.querySelector(`.trip-sorting`);
 const infoContainer = document.querySelector(`.trip`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+const MAX_TRIPS_IN_TITLE = 5;
 
 class Trip extends Component {
   constructor() {
@@ -466,7 +467,7 @@ const getPath = (points) => {
     }
     return acc;
   }, []);
-  if (cities.length <= 5) {
+  if (cities.length <= MAX_TRIPS_IN_TITLE) {
     const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
     return path;
   } else {
