@@ -76,8 +76,7 @@ class PointEditor extends Component {
 
   getDataFromForm() {
     const id = this.point ? this.point.id : ``;
-    const data = formDataConverter(this._form, this.Offers, this.Destinations, id);
-    return data;
+    return formDataConverter(this._form, this.Offers, this.Destinations, id);
   }
 
   onReset(evt) {
@@ -178,7 +177,7 @@ const formDataConverter = (form, Offers, Destinations, id) => {
 
   const isFavourite = form.querySelector(`.point__favorite-input`).checked;
 
-  const data = {
+  return {
     destination,
     type,
     price: Number(object.price),
@@ -190,8 +189,6 @@ const formDataConverter = (form, Offers, Destinations, id) => {
     isFavourite,
     id
   };
-
-  return data;
 };
 
 const getNewDestination = (name, destArray) => {
