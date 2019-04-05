@@ -4,7 +4,7 @@ import flatpickr from 'flatpickr';
 import getPointEditingArticle from '../components/get-point-editing-article';
 
 class PointEditor extends Component {
-  constructor({point, onReset, onSubmit, onDelete, destinationsArray, offersArray}) {
+  constructor({point, onReset, onSubmit, onDelete, Destinations, Offers}) {
     super();
     this.point = point;
     this._ref = null;
@@ -16,8 +16,8 @@ class PointEditor extends Component {
       onDelete
     };
 
-    this.destinationsArray = destinationsArray;
-    this.offersArray = offersArray;
+    this.Destinations = Destinations;
+    this.Offers = Offers;
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onReset = this.onReset.bind(this);
@@ -26,7 +26,7 @@ class PointEditor extends Component {
   }
 
   get template() {
-    return getPointEditingArticle(this.point, this.destinationsArray, this.offersArray);
+    return getPointEditingArticle(this.point, this.Destinations, this.Offers);
   }
 
   render() {
@@ -37,7 +37,6 @@ class PointEditor extends Component {
   }
 
   bind() {
-    // this._form.addEventListener(`submit`, this.onSubmit);
     this._form.addEventListener(`reset`, this.onReset);
     document.addEventListener(`keydown`, this.onEscDown);
     this._form.querySelector(`.point__button--save`).addEventListener(`click`, this.onSubmit);
@@ -45,26 +44,14 @@ class PointEditor extends Component {
 
     const label = this._form.querySelector(`.point__time`);
     label.style.width = `280px`;
+
     const startDateInput = label.querySelector(`.point__input[name=date-start]`);
-    flatpickr(startDateInput, {
-      altInput: true,
-      altFormat: `H:i d M`,
-      dateFormat: `Z`,
-      defaultDate: this.point ? this.point.date.start : Date.now(),
-      [`time_24hr`]: true,
-      enableTime: true
-    });
+    const startOptions = this.point ? getFlatpicrOptions(this.point.date.start) : getFlatpicrOptions(Date.now());
+    flatpickr(startDateInput, startOptions);
 
     const endDateInput = label.querySelector(`.point__input[name=date-end]`);
-    flatpickr(endDateInput, {
-      altInput: true,
-      altFormat: `H:i d M`,
-      dateFormat: `Z`,
-      defaultDate: this.point ? this.point.date.end : Date.now(),
-      [`time_24hr`]: true,
-      enableTime: true
-    });
-
+    const endOptions = this.point ? getFlatpicrOptions(this.point.date.end) : getFlatpicrOptions(Date.now());
+    flatpickr(endDateInput, endOptions);
   }
 
   unbind() {
@@ -76,8 +63,7 @@ class PointEditor extends Component {
 
   getDataFromForm() {
     const id = this.point ? this.point.id : ``;
-    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, id);
-    return data;
+    return formDataConverter(this._form, this.Offers, this.Destinations, id);
   }
 
   onReset(evt) {
@@ -151,7 +137,18 @@ class PointEditor extends Component {
   }
 }
 
-const formDataConverter = (form, offersArray, destinationsArray, id) => {
+const getFlatpicrOptions = (defaultDate) => {
+  return {
+    altInput: true,
+    altFormat: `H:i d M`,
+    dateFormat: `Z`,
+    defaultDate,
+    [`time_24hr`]: true,
+    enableTime: true
+  };
+};
+
+const formDataConverter = (form, Offers, Destinations, id) => {
   const formData = new FormData(form);
   const object = {};
 
@@ -168,9 +165,9 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
   const type = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
 
   const offersElements = form.querySelectorAll(`.point__offers-input`);
-  const offers = getNewOffers([...offersElements], type, offersArray);
+  const offers = getNewOffers([...offersElements], type, Offers);
 
-  const destination = getNewDestination(object.destination, destinationsArray);
+  const destination = getNewDestination(object.destination, Destinations);
 
   if (!destination) {
     return false;
@@ -178,7 +175,7 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
 
   const isFavourite = form.querySelector(`.point__favorite-input`).checked;
 
-  const data = {
+  return {
     destination,
     type,
     price: Number(object.price),
@@ -190,18 +187,16 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
     isFavourite,
     id
   };
-
-  return data;
 };
 
 const getNewDestination = (name, destArray) => {
   return destArray.find((dest) => dest.name === name);
 };
 
-const getNewOffers = (checkboxes, rawType, offersArray) => {
+const getNewOffers = (checkboxes, rawType, Offers) => {
   const type = rawType.toLowerCase();
-  const typedOffersIndex = offersArray.findIndex((element) => element.type === type);
-  const typedOffers = offersArray[typedOffersIndex].offers;
+  const typedOffersIndex = Offers.findIndex((element) => element.type === type);
+  const typedOffers = Offers[typedOffersIndex].offers;
   return typedOffers.map((offer) => {
     const checkbox = checkboxes.find((cbhox) => cbhox.value === offer.name);
     const accepted = checkbox ? checkbox.checked : false;

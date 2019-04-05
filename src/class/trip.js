@@ -13,12 +13,12 @@ import renderTripSorting from '../components/render-trip-sorting';
 import renderTripInfo from '../components/render-trip-info';
 import renderTripFilters from '../components/render-trip-filters';
 
-import filterList from '../common/filter-list';
-import sortingList from '../common/sorting-list';
+import Filters from '../common/filters';
+import Sortings from '../common/sortings';
 import iconDict from '../common/icon-dict';
 import {convertToDateStart} from '../common/utils';
 
-import ServiceAPI from '../service/service-api';
+import Provider from './provider';
 import ChartController from './chart-controller';
 
 const container = document.querySelector(`.trip-points`);
@@ -27,6 +27,7 @@ const sortingContainer = document.querySelector(`.trip-sorting`);
 const infoContainer = document.querySelector(`.trip`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+const MAX_TRIPS_IN_TITLE = 5;
 
 class Trip extends Component {
   constructor() {
@@ -43,7 +44,7 @@ class Trip extends Component {
     this.onNewPointReset = this.onNewPointReset.bind(this);
     this.onNewPointSubmit = this.onNewPointSubmit.bind(this);
 
-    this.api = new ServiceAPI({endPoint: END_POINT, authorization: AUTHORIZATION});
+    this.provider = new Provider({endPoint: END_POINT, authorization: AUTHORIZATION});
     this.newPoint = null;
 
     this._points = [];
@@ -114,14 +115,14 @@ class Trip extends Component {
       onEditorOpening: this.onEditorOpening,
       onPointUpdate: this.onPointUpdate,
       onPointDelete: this.onPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
     return indexInArray;
   }
 
   onPointUpdate(data, pointComponent) {
-    this.api.updatePoint({id: data.id, data})
+    this.provider.updatePoint({id: data.id, data})
       .then((updatedData) => this._updatePoint(updatedData))
       .then(() => this.update())
       .catch(() => {
@@ -140,7 +141,7 @@ class Trip extends Component {
   }
 
   onPointDelete(id, pointComponent) {
-    this.api.deletePoint({id})
+    this.provider.deletePoint({id})
       .then(() => this._deletePoint(id))
       .then(() => this.update())
       .catch(() => {
@@ -149,38 +150,35 @@ class Trip extends Component {
   }
 
   _loadOffers() {
-    return this.api.getOffers()
+    return this.provider.getOffers()
       .then((offers) => {
-        this.offersArray = offers;
-        // console.log({offers})
+        this.Offers = offers;
       });
   }
 
   _loadDestinations() {
-    return this.api.getDestinations()
+    return this.provider.getDestinations()
       .then((destinations) => {
-        this.destinationsArray = destinations;
-        // console.log({destinations})
+        this.Destinations = destinations;
       });
   }
 
   _loadPoints() {
-    return this.api.getPoints()
+    return this.provider.getPoints()
       .then((points) => {
         this._points.forEach((point) => {
           point.closeEditor();
           point.unrender();
           point = null;
         });
-        // console.log({points})
         this._points = points.map((data) => {
           return new PointComponent({
             data,
             onEditorOpening: this.onEditorOpening,
             onPointUpdate: this.onPointUpdate,
             onPointDelete: this.onPointDelete,
-            destinationsArray: this.destinationsArray,
-            offersArray: this.offersArray
+            Destinations: this.Destinations,
+            Offers: this.Offers
           });
         });
       });
@@ -206,8 +204,8 @@ class Trip extends Component {
     this._sortAndFilterPoints();
     this._renderTripPoints();
     this._renderTripInfo();
-    this._renderFilters(filterList);
-    this._renderSorting(sortingList);
+    this._renderFilters(Filters);
+    this._renderSorting(Sortings);
     this._bind();
   }
 
@@ -234,8 +232,8 @@ class Trip extends Component {
       onReset: this.onNewPointReset,
       onSubmit: this.onNewPointSubmit,
       onDelete: this.onNewPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
 
     const ref = this.newPoint.render();
@@ -248,12 +246,11 @@ class Trip extends Component {
   }
 
   onNewPointReset() {
-    this.newPoint.unrender();
-    this.newPoint = null;
+    this.onNewPointDelete();
   }
 
   onNewPointSubmit(data) {
-    this.api.createPoint({data})
+    this.provider.createPoint({data})
       .then((result) => this._addNewPoint(result))
       .catch(() => this.newPoint.onError());
   }
@@ -264,14 +261,25 @@ class Trip extends Component {
       onEditorOpening: this.onEditorOpening,
       onPointUpdate: this.onPointUpdate,
       onPointDelete: this.onPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
     this._points.push(point);
     this.update();
   }
 
   _bind() {
+    window.addEventListener(`offline`, () => {
+      document.title = `${document.title}[OFFLINE]`;
+    });
+    window.addEventListener(`online`, () => {
+      document.title = document.title.split(`[OFFLINE]`)[0];
+      this.provider.syncPoints()
+        .then(() => this._loadPoints())
+        .then(() => this.update())
+        .catch(() => this.onLoadingError());
+    });
+
     document.querySelector(`.trip-controls__new-event`).addEventListener(`click`, this.onNewPointClick);
     this.links.table = document.querySelector(`a[data-href='#table']`);
     this.links.stats = document.querySelector(`a[data-href='#stats']`);
@@ -334,20 +342,20 @@ class Trip extends Component {
     });
   }
 
-  setFilterMethod(evt) {
-    this._filterMethod = evt.target.value;
+  setMethod(methodName, evt) {
+    this[methodName] = evt.target.value;
     this.update();
     if (this.state.isStatisticShown) {
       this.chartController.updateCharts(this._renderedPoints);
     }
   }
 
+  setFilterMethod(evt) {
+    this.setMethod(`_filterMethod`, evt);
+  }
+
   setSortingMethod(evt) {
-    this._sortMethod = evt.target.value;
-    this.update();
-    if (this.state.isStatisticShown) {
-      this.chartController.updateCharts(this._renderedPoints);
-    }
+    this.setMethod(`_sortMethod`, evt);
   }
 
   _renderTripPoints() {
@@ -384,16 +392,16 @@ class Trip extends Component {
 const sortPoints = (points, method) => {
   switch (method) {
     case `date`: {
-      return sortPointsByDate(points);
+      return sortPointsBy(byDate, points);
     }
     case `type`: {
       return points;
     }
     case `time`: {
-      return sortPointsByDuration(points);
+      return sortPointsBy(byDuration, points);
     }
     case `price`: {
-      return sortPointsByPrice(points);
+      return sortPointsBy(byPrice, points);
     }
     default : {
       return points;
@@ -401,31 +409,23 @@ const sortPoints = (points, method) => {
   }
 };
 
-const sortPointsByDate = (points) => {
+const sortPointsBy = (callback, points) => {
   return [...points].sort((a, b) => {
-    return a.date.start - b.date.start;
+    return callback(a) - callback(b);
   });
 };
 
-const sortPointsByDuration = (points) => {
-  return [...points].sort((a, b) => {
-    return a.durationMinutes - b.durationMinutes;
-  });
-};
-
-const sortPointsByPrice = (points) => {
-  return [...points].sort((a, b) => {
-    return a.price - b.price;
-  });
-};
+const byDate = (point) => point.date.start;
+const byDuration = (point) => point.durationMinutes;
+const byPrice = (point) => point.price;
 
 const filterPoints = (points, method) => {
   switch (method) {
     case `Future`: {
-      return futurePoints(points);
+      return filterPointsBy(isFuture, points);
     }
     case `Past`: {
-      return pastPoints(points);
+      return filterPointsBy(isPast, points);
     }
     default: {
       return points;
@@ -433,17 +433,14 @@ const filterPoints = (points, method) => {
   }
 };
 
-const futurePoints = (points) => {
+const filterPointsBy = (callback, points) => {
   return [...points].filter((point) => {
-    return point.date.start > Date.now();
+    return callback(point);
   });
 };
 
-const pastPoints = (points) => {
-  return [...points].filter((point) => {
-    return point.date.start < Date.now();
-  });
-};
+const isFuture = (point) => point.date.start > Date.now();
+const isPast = (point) => point.date.start < Date.now();
 
 const getStartDate = (points) => {
   const temp = points.map((point) => point.date.start);
@@ -466,7 +463,7 @@ const getPath = (points) => {
     }
     return acc;
   }, []);
-  if (cities.length <= 5) {
+  if (cities.length <= MAX_TRIPS_IN_TITLE) {
     const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
     return path;
   } else {

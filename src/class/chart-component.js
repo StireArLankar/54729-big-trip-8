@@ -4,18 +4,19 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 const BAR_HEIGHT = 55;
 
 class ChartComponent {
-  constructor({title, unit, selector, labels, data, unitSecond}) {
+  constructor({title, unit, selector, isUnitSecond}) {
     this._ref = document.querySelector(selector);
     this._chart = null;
     this.title = title;
     this.unit = unit;
-    this.labels = labels;
-    this.dataArray = data;
-    this.unitSecond = unitSecond ? true : false;
+    this.labels = null;
+    this.dataArray = null;
+    this.isUnitSecond = Boolean(isUnitSecond);
   }
 
-  updateChart(data) {
+  updateChart(data, labels) {
     this.dataArray = data;
+    this.labels = labels;
     if (this._chart) {
       this._chart.destroy();
     } else {
@@ -26,7 +27,7 @@ class ChartComponent {
   }
 }
 
-const getChartOptions = ({unitSecond, labels, dataArray: data, unit, title}) => {
+const getChartOptions = ({isUnitSecond, labels, dataArray: data, unit, title}) => {
   return {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
@@ -48,7 +49,7 @@ const getChartOptions = ({unitSecond, labels, dataArray: data, unit, title}) => 
           color: `#000000`,
           anchor: `end`,
           align: `start`,
-          formatter: (val) => unitSecond ? `${val} ${unit}` : `${unit} ${val}`
+          formatter: (val) => isUnitSecond ? `${val} ${unit}` : `${unit} ${val}`
         }
       },
       title: {

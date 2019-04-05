@@ -1,4 +1,4 @@
-const sortingList = [
+const Sortings = [
   {
     name: `Date`,
     checked: true
@@ -14,4 +14,4 @@ const sortingList = [
   }
 ];
 
-export default sortingList;
+export default Sortings;

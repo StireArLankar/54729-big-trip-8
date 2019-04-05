@@ -41,7 +41,7 @@ class ServiceAPI {
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
-    .then((result) => result.json());
+      .then((result) => result.json());
   }
 
   updatePoint({id, data}) {
@@ -51,11 +51,21 @@ class ServiceAPI {
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
-    .then((result) => result.json());
+      .then((result) => result.json());
   }
 
   deletePoint({id}) {
     return this._load({url: `points/${id}`, method: Method.DELETE});
+  }
+
+  syncPoints({points}) {
+    return this._load({
+      url: `points/sync`,
+      method: `POST`,
+      body: JSON.stringify(points),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then((result) => result.json());
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {

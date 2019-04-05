@@ -290,7 +290,7 @@ const getPath = points => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-const filterList = [{
+const Filters = [{
   name: `Everything`,
   checked: true
 }, {
@@ -298,7 +298,7 @@ const filterList = [{
 }, {
   name: `Past`
 }];
-/* harmony default export */ __webpack_exports__["default"] = (filterList);
+/* harmony default export */ __webpack_exports__["default"] = (Filters);
 
 /***/ }),
 
@@ -336,7 +336,7 @@ const iconDict = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-const filterList = [{
+const Filters = [{
   name: `Event`,
   checked: true
 }, {
@@ -344,7 +344,7 @@ const filterList = [{
 }, {
   name: `Price`
 }];
-/* harmony default export */ __webpack_exports__["default"] = (filterList);
+/* harmony default export */ __webpack_exports__["default"] = (Filters);
 
 /***/ }),
 
@@ -360,12 +360,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _containers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./containers */ "./src/components/header/containers.js");
 
 
-const addFilterListener = callback => {
+const addFiltersener = callback => {
   const filters = _containers__WEBPACK_IMPORTED_MODULE_0__["tripFilter"].querySelectorAll(`[name=filter]`);
   filters.forEach(filter => filter.addEventListener(`change`, callback));
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (addFilterListener);
+/* harmony default export */ __webpack_exports__["default"] = (addFiltersener);
 
 /***/ }),
 
@@ -390,7 +390,7 @@ const trip = document.querySelector(`.trip`);
 /*!****************************************!*\
   !*** ./src/components/header/index.js ***!
   \****************************************/
-/*! exports provided: renderTripInfo, renderTripFilters, addFilterListener */
+/*! exports provided: renderTripInfo, renderTripFilters, addFiltersener */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -402,7 +402,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "renderTripFilters", function() { return _render_trip_filters__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
 /* harmony import */ var _add_filter_listener__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./add-filter-listener */ "./src/components/header/add-filter-listener.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "addFilterListener", function() { return _add_filter_listener__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "addFiltersener", function() { return _add_filter_listener__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
 
 
@@ -869,7 +869,7 @@ const randomPoints = points => {
 const testTrip = new _class_trip__WEBPACK_IMPORTED_MODULE_3__["default"](testPoints);
 testTrip.render(); // testTrip.clearTripPoints();
 
-Object(_components_header__WEBPACK_IMPORTED_MODULE_0__["addFilterListener"])(() => {
+Object(_components_header__WEBPACK_IMPORTED_MODULE_0__["addFiltersener"])(() => {
   const temp = randomPoints(testPoints);
   Object(_components_main__WEBPACK_IMPORTED_MODULE_1__["renderTripPoints"])(temp);
 });

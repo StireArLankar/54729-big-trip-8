@@ -19,41 +19,14 @@ class ChartController {
         selector: `.statistic__time-spend`,
         title: `Time distribution`,
         unit: `H`,
-        unitSecond: true
+        isUnitSecond: true
       }
     };
   }
 
-  initCharts(points) {
-    this._initMoneyChart(points);
-    this._initTransportChart(points);
-    this._initTimeSpendChart(points);
-  }
-
-  _initMoneyChart(points) {
-    const [data, labels] = getMoneyStats(points, this.chartLabels);
-
-    this.charts.money.data = data;
-    this.charts.money.labels = labels;
-
+  initCharts() {
     this.charts.money.chart = new ChartComponent(this.charts.money);
-  }
-
-  _initTransportChart(points) {
-    const [data, labels] = getTransportStats(points, this.chartLabels);
-
-    this.charts.transport.data = data;
-    this.charts.transport.labels = labels;
-
     this.charts.transport.chart = new ChartComponent(this.charts.transport);
-  }
-
-  _initTimeSpendChart(points) {
-    const [data, labels] = getTimeSpendStats(points, this.chartLabels);
-
-    this.charts.timeSpend.data = data;
-    this.charts.timeSpend.labels = labels;
-
     this.charts.timeSpend.chart = new ChartComponent(this.charts.timeSpend);
   }
 
