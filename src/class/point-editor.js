@@ -37,7 +37,6 @@ class PointEditor extends Component {
   }
 
   bind() {
-    // this._form.addEventListener(`submit`, this.onSubmit);
     this._form.addEventListener(`reset`, this.onReset);
     document.addEventListener(`keydown`, this.onEscDown);
     this._form.querySelector(`.point__button--save`).addEventListener(`click`, this.onSubmit);
@@ -45,26 +44,14 @@ class PointEditor extends Component {
 
     const label = this._form.querySelector(`.point__time`);
     label.style.width = `280px`;
+
     const startDateInput = label.querySelector(`.point__input[name=date-start]`);
-    flatpickr(startDateInput, {
-      altInput: true,
-      altFormat: `H:i d M`,
-      dateFormat: `Z`,
-      defaultDate: this.point ? this.point.date.start : Date.now(),
-      [`time_24hr`]: true,
-      enableTime: true
-    });
+    const startOptions = this.point ? getFlatpicrOptions(this.point.date.start) : getFlatpicrOptions(Date.now());
+    flatpickr(startDateInput, startOptions);
 
     const endDateInput = label.querySelector(`.point__input[name=date-end]`);
-    flatpickr(endDateInput, {
-      altInput: true,
-      altFormat: `H:i d M`,
-      dateFormat: `Z`,
-      defaultDate: this.point ? this.point.date.end : Date.now(),
-      [`time_24hr`]: true,
-      enableTime: true
-    });
-
+    const endOptions = this.point ? getFlatpicrOptions(this.point.date.end) : getFlatpicrOptions(Date.now());
+    flatpickr(endDateInput, endOptions);
   }
 
   unbind() {
@@ -149,6 +136,17 @@ class PointEditor extends Component {
     this._ref = null;
   }
 }
+
+const getFlatpicrOptions = (defaultDate) => {
+  return {
+    altInput: true,
+    altFormat: `H:i d M`,
+    dateFormat: `Z`,
+    defaultDate,
+    [`time_24hr`]: true,
+    enableTime: true
+  };
+};
 
 const formDataConverter = (form, Offers, Destinations, id) => {
   const formData = new FormData(form);

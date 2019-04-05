@@ -39,9 +39,6 @@ class PointComponent extends PointModel {
     evt.stopPropagation();
     this.cb.onEditorOpening();
 
-    // this.trip.points.forEach((point) => {
-    //   point.closeEditor();
-    // });
     this.editor = new PointEditor({
       point: this,
       onReset: this.onEditorReset,
@@ -62,8 +59,6 @@ class PointComponent extends PointModel {
   }
 
   onEditorSubmit(rawData) {
-    // this.update(data);
-    // this.closeEditor();
     this.cb.onPointUpdate(rawData, this);
   }
 

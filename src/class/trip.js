@@ -153,7 +153,6 @@ class Trip extends Component {
     return this.api.getOffers()
       .then((offers) => {
         this.Offers = offers;
-        // console.log({offers})
       });
   }
 
@@ -161,7 +160,6 @@ class Trip extends Component {
     return this.api.getDestinations()
       .then((destinations) => {
         this.Destinations = destinations;
-        // console.log({destinations})
       });
   }
 
@@ -173,7 +171,6 @@ class Trip extends Component {
           point.unrender();
           point = null;
         });
-        // console.log({points})
         this._points = points.map((data) => {
           return new PointComponent({
             data,
@@ -249,8 +246,7 @@ class Trip extends Component {
   }
 
   onNewPointReset() {
-    this.newPoint.unrender();
-    this.newPoint = null;
+    this.onNewPointDelete();
   }
 
   onNewPointSubmit(data) {
@@ -335,20 +331,20 @@ class Trip extends Component {
     });
   }
 
-  setFilterMethod(evt) {
-    this._filterMethod = evt.target.value;
+  setMethod(methodName, evt) {
+    this[methodName] = evt.target.value;
     this.update();
     if (this.state.isStatisticShown) {
       this.chartController.updateCharts(this._renderedPoints);
     }
   }
 
+  setFilterMethod(evt) {
+    this.setMethod(`_filterMethod`, evt);
+  }
+
   setSortingMethod(evt) {
-    this._sortMethod = evt.target.value;
-    this.update();
-    if (this.state.isStatisticShown) {
-      this.chartController.updateCharts(this._renderedPoints);
-    }
+    this.setMethod(`_sortMethod`, evt);
   }
 
   _renderTripPoints() {
@@ -385,16 +381,16 @@ class Trip extends Component {
 const sortPoints = (points, method) => {
   switch (method) {
     case `date`: {
-      return sortPointsByDate(points);
+      return sortPointsBy(byDate, points);
     }
     case `type`: {
       return points;
     }
     case `time`: {
-      return sortPointsByDuration(points);
+      return sortPointsBy(byDuration, points);
     }
     case `price`: {
-      return sortPointsByPrice(points);
+      return sortPointsBy(byPrice, points);
     }
     default : {
       return points;
@@ -402,31 +398,23 @@ const sortPoints = (points, method) => {
   }
 };
 
-const sortPointsByDate = (points) => {
+const sortPointsBy = (callback, points) => {
   return [...points].sort((a, b) => {
-    return a.date.start - b.date.start;
+    return callback(a) - callback(b);
   });
 };
 
-const sortPointsByDuration = (points) => {
-  return [...points].sort((a, b) => {
-    return a.durationMinutes - b.durationMinutes;
-  });
-};
-
-const sortPointsByPrice = (points) => {
-  return [...points].sort((a, b) => {
-    return a.price - b.price;
-  });
-};
+const byDate = (point) => point.date.start;
+const byDuration = (point) => point.durationMinutes;
+const byPrice = (point) => point.price;
 
 const filterPoints = (points, method) => {
   switch (method) {
     case `Future`: {
-      return futurePoints(points);
+      return filterPointsBy(isFuture, points);
     }
     case `Past`: {
-      return pastPoints(points);
+      return filterPointsBy(isPast, points);
     }
     default: {
       return points;
@@ -434,17 +422,14 @@ const filterPoints = (points, method) => {
   }
 };
 
-const futurePoints = (points) => {
+const filterPointsBy = (callback, points) => {
   return [...points].filter((point) => {
-    return point.date.start > Date.now();
+    return callback(point);
   });
 };
 
-const pastPoints = (points) => {
-  return [...points].filter((point) => {
-    return point.date.start < Date.now();
-  });
-};
+const isFuture = (point) => point.date.start > Date.now();
+const isPast = (point) => point.date.start < Date.now();
 
 const getStartDate = (points) => {
   const temp = points.map((point) => point.date.start);

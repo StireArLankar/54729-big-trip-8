@@ -19,7 +19,7 @@ class ChartController {
         selector: `.statistic__time-spend`,
         title: `Time distribution`,
         unit: `H`,
-        unitSecond: true
+        isUnitSecond: true
       }
     };
   }
