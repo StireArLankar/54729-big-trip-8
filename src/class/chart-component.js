@@ -4,18 +4,19 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 const BAR_HEIGHT = 55;
 
 class ChartComponent {
-  constructor({title, unit, selector, labels, data, isUnitSecond}) {
+  constructor({title, unit, selector, isUnitSecond}) {
     this._ref = document.querySelector(selector);
     this._chart = null;
     this.title = title;
     this.unit = unit;
-    this.labels = labels;
-    this.dataArray = data;
+    this.labels = null;
+    this.dataArray = null;
     this.isUnitSecond = Boolean(isUnitSecond);
   }
 
-  updateChart(data) {
+  updateChart(data, labels) {
     this.dataArray = data;
+    this.labels = labels;
     if (this._chart) {
       this._chart.destroy();
     } else {
