@@ -4,7 +4,7 @@ import flatpickr from 'flatpickr';
 import getPointEditingArticle from '../components/get-point-editing-article';
 
 class PointEditor extends Component {
-  constructor({point, onReset, onSubmit, onDelete, destinationsArray, offersArray}) {
+  constructor({point, onReset, onSubmit, onDelete, Destinations, Offers}) {
     super();
     this.point = point;
     this._ref = null;
@@ -16,8 +16,8 @@ class PointEditor extends Component {
       onDelete
     };
 
-    this.destinationsArray = destinationsArray;
-    this.offersArray = offersArray;
+    this.Destinations = Destinations;
+    this.Offers = Offers;
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onReset = this.onReset.bind(this);
@@ -26,7 +26,7 @@ class PointEditor extends Component {
   }
 
   get template() {
-    return getPointEditingArticle(this.point, this.destinationsArray, this.offersArray);
+    return getPointEditingArticle(this.point, this.Destinations, this.Offers);
   }
 
   render() {
@@ -76,7 +76,7 @@ class PointEditor extends Component {
 
   getDataFromForm() {
     const id = this.point ? this.point.id : ``;
-    const data = formDataConverter(this._form, this.offersArray, this.destinationsArray, id);
+    const data = formDataConverter(this._form, this.Offers, this.Destinations, id);
     return data;
   }
 
@@ -151,7 +151,7 @@ class PointEditor extends Component {
   }
 }
 
-const formDataConverter = (form, offersArray, destinationsArray, id) => {
+const formDataConverter = (form, Offers, Destinations, id) => {
   const formData = new FormData(form);
   const object = {};
 
@@ -168,9 +168,9 @@ const formDataConverter = (form, offersArray, destinationsArray, id) => {
   const type = object[`travel-way`][0].toUpperCase() + object[`travel-way`].slice(1);
 
   const offersElements = form.querySelectorAll(`.point__offers-input`);
-  const offers = getNewOffers([...offersElements], type, offersArray);
+  const offers = getNewOffers([...offersElements], type, Offers);
 
-  const destination = getNewDestination(object.destination, destinationsArray);
+  const destination = getNewDestination(object.destination, Destinations);
 
   if (!destination) {
     return false;
@@ -198,10 +198,10 @@ const getNewDestination = (name, destArray) => {
   return destArray.find((dest) => dest.name === name);
 };
 
-const getNewOffers = (checkboxes, rawType, offersArray) => {
+const getNewOffers = (checkboxes, rawType, Offers) => {
   const type = rawType.toLowerCase();
-  const typedOffersIndex = offersArray.findIndex((element) => element.type === type);
-  const typedOffers = offersArray[typedOffersIndex].offers;
+  const typedOffersIndex = Offers.findIndex((element) => element.type === type);
+  const typedOffers = Offers[typedOffersIndex].offers;
   return typedOffers.map((offer) => {
     const checkbox = checkboxes.find((cbhox) => cbhox.value === offer.name);
     const accepted = checkbox ? checkbox.checked : false;

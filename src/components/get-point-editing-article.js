@@ -1,13 +1,13 @@
 import iconDict from '../common/icon-dict';
-import typeList from '../common/type-list';
+import Types from '../common/types';
 import {withPrepositions} from '../common/utils';
 
-const getPointEditingArticle = (point, destinationsArray, offersArray) => {
+const getPointEditingArticle = (point, Destinations, Offers) => {
   const pictures = point ? point.pictures : [];
   const desc = point ? point.description : ``;
   const price = point ? point.price : 0;
-  const type = point ? point.type : typeList[0];
-  const offers = point ? point.offers : offersArray[0].offers;
+  const type = point ? point.type : Types[0];
+  const offers = point ? point.offers : Offers[0].offers;
   const destination = point ? point.destination : ``;
   const isFavourite = point ? point.isFavourite : false;
 
@@ -25,7 +25,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
     `;
   }).join(``);
 
-  const travelRadio = typeList.map((item) => {
+  const travelRadio = Types.map((item) => {
     return `
       <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.toLowerCase()}" name="travel-way" value="${item}" ${item === type ? `checked` : ``}>
       <label class="travel-way__select-label" for="travel-way-${item.toLowerCase()}">${iconDict[item]} ${item}</label>
@@ -46,7 +46,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
     </div>
   `;
 
-  const destinationList = destinationsArray.map((dest) => {
+  const destinationList = Destinations.map((dest) => {
     return `<option value='${dest.name}'></option>`;
   }).join(``);
 
@@ -124,7 +124,7 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
     const offersWrap = article.querySelector(`.point__offers-wrap`);
     const newDiv = document.createElement(`div`);
     newDiv.classList.add(`point__offers-wrap`);
-    newDiv.innerHTML = getOffers(value, offersArray);
+    newDiv.innerHTML = getOffers(value, Offers);
     offersWrap.parentNode.replaceChild(newDiv, offersWrap);
   };
 
@@ -139,9 +139,9 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
   });
 
   const onDestinationChange = (evt) => {
-    const index = destinationsArray.findIndex((dest) => dest.name === evt.target.value);
+    const index = Destinations.findIndex((dest) => dest.name === evt.target.value);
     if (index > -1) {
-      upgradeDestination(destinationsArray[index]);
+      upgradeDestination(Destinations[index]);
     }
   };
 
@@ -159,9 +159,9 @@ const getPointEditingArticle = (point, destinationsArray, offersArray) => {
   return article;
 };
 
-const getOffers = (value, offersArray) => {
-  const index = offersArray.findIndex((offers) => offers.type === value.toLowerCase());
-  return printOffers(offersArray[index].offers);
+const getOffers = (value, Offers) => {
+  const index = Offers.findIndex((offers) => offers.type === value.toLowerCase());
+  return printOffers(Offers[index].offers);
 };
 
 const printOffers = (array) => {

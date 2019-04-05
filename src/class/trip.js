@@ -13,8 +13,8 @@ import renderTripSorting from '../components/render-trip-sorting';
 import renderTripInfo from '../components/render-trip-info';
 import renderTripFilters from '../components/render-trip-filters';
 
-import filterList from '../common/filter-list';
-import sortingList from '../common/sorting-list';
+import Filters from '../common/filters';
+import Sortings from '../common/sortings';
 import iconDict from '../common/icon-dict';
 import {convertToDateStart} from '../common/utils';
 
@@ -114,8 +114,8 @@ class Trip extends Component {
       onEditorOpening: this.onEditorOpening,
       onPointUpdate: this.onPointUpdate,
       onPointDelete: this.onPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
     return indexInArray;
   }
@@ -151,7 +151,7 @@ class Trip extends Component {
   _loadOffers() {
     return this.api.getOffers()
       .then((offers) => {
-        this.offersArray = offers;
+        this.Offers = offers;
         // console.log({offers})
       });
   }
@@ -159,7 +159,7 @@ class Trip extends Component {
   _loadDestinations() {
     return this.api.getDestinations()
       .then((destinations) => {
-        this.destinationsArray = destinations;
+        this.Destinations = destinations;
         // console.log({destinations})
       });
   }
@@ -179,8 +179,8 @@ class Trip extends Component {
             onEditorOpening: this.onEditorOpening,
             onPointUpdate: this.onPointUpdate,
             onPointDelete: this.onPointDelete,
-            destinationsArray: this.destinationsArray,
-            offersArray: this.offersArray
+            Destinations: this.Destinations,
+            Offers: this.Offers
           });
         });
       });
@@ -206,8 +206,8 @@ class Trip extends Component {
     this._sortAndFilterPoints();
     this._renderTripPoints();
     this._renderTripInfo();
-    this._renderFilters(filterList);
-    this._renderSorting(sortingList);
+    this._renderFilters(Filters);
+    this._renderSorting(Sortings);
     this._bind();
   }
 
@@ -234,8 +234,8 @@ class Trip extends Component {
       onReset: this.onNewPointReset,
       onSubmit: this.onNewPointSubmit,
       onDelete: this.onNewPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
 
     const ref = this.newPoint.render();
@@ -264,8 +264,8 @@ class Trip extends Component {
       onEditorOpening: this.onEditorOpening,
       onPointUpdate: this.onPointUpdate,
       onPointDelete: this.onPointDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
     this._points.push(point);
     this.update();

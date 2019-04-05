@@ -3,10 +3,10 @@ import PointModel from './point-model';
 import PointEditor from './point-editor';
 
 class PointComponent extends PointModel {
-  constructor({data, onEditorOpening, onPointUpdate, onPointDelete, offersArray, destinationsArray}) {
+  constructor({data, onEditorOpening, onPointUpdate, onPointDelete, Offers, Destinations}) {
     super(data);
-    this.destinationsArray = destinationsArray;
-    this.offersArray = offersArray;
+    this.Destinations = Destinations;
+    this.Offers = Offers;
 
     this.cb = {
       onEditorOpening,
@@ -47,8 +47,8 @@ class PointComponent extends PointModel {
       onReset: this.onEditorReset,
       onSubmit: this.onEditorSubmit,
       onDelete: this.onEditorDelete,
-      destinationsArray: this.destinationsArray,
-      offersArray: this.offersArray
+      Destinations: this.Destinations,
+      Offers: this.Offers
     });
 
     const editorRef = this.editor.render();

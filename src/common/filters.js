@@ -1,4 +1,4 @@
-const filterList = [
+const Filters = [
   {
     name: `Everything`,
     checked: true
@@ -11,4 +11,4 @@ const filterList = [
   }
 ];
 
-export default filterList;
+export default Filters;
