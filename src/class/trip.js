@@ -2,13 +2,6 @@ import PointComponent from './point-component';
 import PointEditor from './point-editor';
 import Component from './component';
 
-import {
-  renderTripDays,
-  renderTripTimes,
-  renderTripTypes,
-  renderTripPrice
-} from '../components/point-renders';
-
 import renderTripSorting from '../components/render-trip-sorting';
 import renderTripInfo from '../components/render-trip-info';
 import renderTripFilters from '../components/render-trip-filters';
@@ -16,10 +9,11 @@ import renderTripFilters from '../components/render-trip-filters';
 import Filters from '../common/filters';
 import Sortings from '../common/sortings';
 import iconDict from '../common/icon-dict';
-import {convertToDateStart} from '../common/utils';
 
 import Provider from './provider';
 import ChartController from './chart-controller';
+
+import {getPath, getStartDate, getEndDate, clearElement, sortPoints, filterPoints, renderTripPoints} from '../common/tripUtils';
 
 const container = document.querySelector(`.trip-points`);
 const filtersContainer = document.querySelector(`.trip-filter`);
@@ -27,7 +21,6 @@ const sortingContainer = document.querySelector(`.trip-sorting`);
 const infoContainer = document.querySelector(`.trip`);
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
-const MAX_TRIPS_IN_TITLE = 5;
 
 class Trip extends Component {
   constructor() {
@@ -56,6 +49,8 @@ class Trip extends Component {
     this.state = {
       isStatisticShown: false
     };
+
+    this.container = container;
 
     this.links = {
       table: null,
@@ -343,6 +338,9 @@ class Trip extends Component {
   }
 
   setMethod(methodName, evt) {
+    if (methodName !== `_filterMethod` && methodName !== `_sortMethod`) {
+      return;
+    }
     this[methodName] = evt.target.value;
     this.update();
     if (this.state.isStatisticShown) {
@@ -359,27 +357,7 @@ class Trip extends Component {
   }
 
   _renderTripPoints() {
-    switch (this._sortMethod) {
-      case `date`: {
-        renderTripDays(this._renderedPoints, container, this.startDate);
-        break;
-      }
-      case `type`: {
-        renderTripTypes(this._renderedPoints, container);
-        break;
-      }
-      case `time`: {
-        renderTripTimes(this._renderedPoints, container);
-        break;
-      }
-      case `price`: {
-        renderTripPrice(this._renderedPoints, container);
-        break;
-      }
-      default : {
-        renderTripDays(this._renderedPoints, container, this.startDate);
-      }
-    }
+    renderTripPoints(this._sortMethod, this._renderedPoints, container, this.startDate);
   }
 
   _sortAndFilterPoints() {
@@ -388,96 +366,5 @@ class Trip extends Component {
     this._renderedPoints = filteredPoints;
   }
 }
-
-const sortPoints = (points, method) => {
-  switch (method) {
-    case `date`: {
-      return sortPointsBy(byDate, points);
-    }
-    case `type`: {
-      return points;
-    }
-    case `time`: {
-      return sortPointsBy(byDuration, points);
-    }
-    case `price`: {
-      return sortPointsBy(byPrice, points);
-    }
-    default : {
-      return points;
-    }
-  }
-};
-
-const sortPointsBy = (callback, points) => {
-  return [...points].sort((a, b) => {
-    return callback(a) - callback(b);
-  });
-};
-
-const byDate = (point) => point.date.start;
-const byDuration = (point) => point.durationMinutes;
-const byPrice = (point) => point.price;
-
-const filterPoints = (points, method) => {
-  switch (method) {
-    case `Future`: {
-      return filterPointsBy(isFuture, points);
-    }
-    case `Past`: {
-      return filterPointsBy(isPast, points);
-    }
-    default: {
-      return points;
-    }
-  }
-};
-
-const filterPointsBy = (callback, points) => {
-  return [...points].filter((point) => {
-    return callback(point);
-  });
-};
-
-const isFuture = (point) => point.date.start > Date.now();
-const isPast = (point) => point.date.start < Date.now();
-
-const getStartDate = (points) => {
-  const temp = points.map((point) => point.date.start);
-  const min = Math.min(...temp);
-  const date = convertToDateStart(min);
-  return date;
-};
-
-const getEndDate = (points) => {
-  const temp = points.map((point) => point.date.end);
-  const max = Math.max(...temp);
-  const date = convertToDateStart(max);
-  return date;
-};
-
-const getPath = (points) => {
-  const cities = points.reduce((acc, cur) => {
-    if (acc[acc.length - 1] !== cur.destination) {
-      acc.push(cur.destination);
-    }
-    return acc;
-  }, []);
-  if (cities.length <= MAX_TRIPS_IN_TITLE) {
-    const path = cities.reduceRight((acc, cur) => `${cur} — ${acc}`);
-    return path;
-  } else {
-    const firstCities = cities.slice(0, 2);
-    const lastCities = cities.slice(-2);
-    const path = `${firstCities[0]} — ${firstCities[1]}  — ...  — ${lastCities[0]} — ${lastCities[1]}`;
-    return path;
-  }
-};
-
-const clearElement = (el) => {
-  while (el.children.length > 0) {
-    el.removeChild(el.lastChild);
-  }
-};
 
 export default Trip;

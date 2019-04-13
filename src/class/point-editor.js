@@ -1,5 +1,5 @@
 import Component from './component';
-import PointModel from './point-model';
+import PointComponent from './point-component';
 import flatpickr from 'flatpickr';
 import getPointEditingArticle from '../components/get-point-editing-article';
 
@@ -81,7 +81,7 @@ class PointEditor extends Component {
     evt.preventDefault();
     const data = this.getDataFromForm();
     if (data) {
-      const pointData = PointModel.raw(data);
+      const pointData = PointComponent.raw(data);
       this.block();
       this.cb.onSubmit(pointData);
     } else {

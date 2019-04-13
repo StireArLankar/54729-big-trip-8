@@ -8,10 +8,7 @@ const renderTripPrice = (points, container) => {
     points
   };
 
-  const fragment = document.createDocumentFragment();
-  fragment.appendChild(getPointsSection(options));
-
-  container.appendChild(fragment);
+  container.appendChild(getPointsSection(options));
 };
 
 export default renderTripPrice;
